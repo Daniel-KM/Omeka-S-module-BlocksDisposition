@@ -1,0 +1,38 @@
+.blocksdisposition-module-group-fields .field {
+    width: auto;
+    display: inline-flex;
+    background-color: transparent;
+}
+
+.blocksdisposition-module-group-fields .button.active {
+    outline: -webkit-focus-ring-color auto 5px;
+}
+
+.blocksdisposition-module-group-fields .js-module-position {
+    position: absolute;
+    right: 0px;
+    top: -4px;
+    border: 1px solid;
+    background-color: #fff;
+    border-radius: 11px;
+    padding-left: 5px;
+    padding-right: 6px;
+    display: none;
+    color: green;
+    line-height: 22px;
+}
+
+.blocksdisposition-module-group-fields .js-module-position.active {
+    display: block;
+}
+
+.block-for {
+    display: flex;
+}
+
+.block-for .block_title {
+    margin-top: 10px;
+    width: 152px;
+    text-align: right;
+    margin-right: 10px;
+}
