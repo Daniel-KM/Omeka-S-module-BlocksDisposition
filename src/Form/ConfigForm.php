@@ -15,7 +15,7 @@ class ConfigForm extends Form
                 'type' => Element\Select::class,
                 'options' => [
                     'label' => 'Modules used in resource views', // @translate
-                    'info' => 'List all the module that used the trigger "view.show.after" and that may be displayed and ordered.', // @translate
+                    'info' => 'List all modules that use the trigger "view.show.after" and that may be displayed and ordered.', // @translate
                     'documentation' => 'https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition',
                     'value_options' => $this->getModules(),
                     'empty_option' => '',

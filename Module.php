@@ -105,8 +105,6 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $sharedEventManager = $services->get('SharedEventManager');
 
-        parent::attachListeners($sharedEventManager);
-
         // The current site is automatically set.
         $moduleNames = $services->get('Omeka\Settings\Site')->get($siteSettingName, []);
         $moduleListeners = [];
