@@ -179,7 +179,6 @@ class Module extends AbstractModule
         $settings = $services->get('Omeka\Settings\Site');
         $data = $this->prepareDataToPopulate($settings, $settingType);
 
-
         $translator = $services->get('MvcTranslator');
         $blockTitles = [
             'blocksdisposition_item_browse' => $translator->translate('For item browse'), // @translate
@@ -196,6 +195,11 @@ class Module extends AbstractModule
             ->setAttribute('id', $space)
             ->setAttribute('data-block-titles', json_encode($blockTitles))
             ->setAttribute('data-modules', json_encode($modules));
+
+        if (empty($modules)) {
+            $fieldset
+                ->setLabel('Blocks Disposition (module config missing)');
+        }
 
         // Hidden doesn't support multiple ordered values in Zend, so a
         // multicheckbox is added. The hidden values are not saved, because Zend
