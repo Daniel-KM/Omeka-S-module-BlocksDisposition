@@ -96,7 +96,7 @@ class Module extends AbstractModule
     /**
      * Enable, disable and reorder modules according to the sie settings.
      *
-     * @param string $identifier Event identifier (controller)
+     * @param string $identifier Event identifier
      * @param string $eventName
      * @param string $siteSettingName
      */
@@ -108,41 +108,27 @@ class Module extends AbstractModule
         parent::attachListeners($sharedEventManager);
 
         // The current site is automatically set.
-        $modules = $services->get('Omeka\Settings\Site')->get($siteSettingName, []);
+        $moduleNames = $services->get('Omeka\Settings\Site')->get($siteSettingName, []);
+        $moduleListeners = [];
 
-        $listenersByEvent = [];
-        $listenersByEvent[$eventName] = $sharedEventManager->getListeners([$identifier], $eventName);
-
-        $listenersByEventViewShowAfter = [];
-
-        foreach ($listenersByEvent as $listeners) {
-            foreach ($listeners as $listener) {
-                foreach ($listener as $list) {
-                    foreach ($list as $val) {
-                        if (is_object($val)) {
-                            $module_name = explode('\\', (new \ReflectionClass($val))->getName());
-                        }
-                    }
-
-                    $sharedEventManager->detach($list, $identifier, $eventName);
-
-                    if (isset($module_name[0])) {
-                        $listenersByEventViewShowAfter[$module_name[0]] = $list;
-                    }
+        // Detach all listeners for the event.
+        $listeners = $sharedEventManager->getListeners([$identifier], $eventName);
+        foreach ($listeners as $listener) {
+            foreach ($listener as $callable) {
+                // Only object/method with the namespace of the module are
+                // managed, not closures. Nevertheless, closures are kept.
+                if (is_array($callable) && is_object($callable[0])) {
+                    $moduleName = strtok(get_class($callable[0]), '\\');
+                    $moduleListeners[$moduleName] = $callable;
+                    $sharedEventManager->detach($callable, $identifier, $eventName);
                 }
             }
         }
 
-        if (count($modules)) {
-            foreach ($modules as $module) {
-                if (isset($listenersByEventViewShowAfter[$module][0])) {
-                    $sharedEventManager->attach(
-                        $identifier,
-                        $eventName,
-                        [$listenersByEventViewShowAfter[$module][0], $listenersByEventViewShowAfter[$module][1]]
-                    );
-                }
-            }
+        // Attach listed and ordered modules to the event.
+        $moduleNames = array_intersect($moduleNames, array_keys($moduleListeners));
+        foreach ($moduleNames as $moduleName) {
+            $sharedEventManager->attach($identifier, $eventName, $moduleListeners[$moduleName]);
         }
     }
 

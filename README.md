@@ -41,7 +41,12 @@ the theme.
 Compatibility warning
 ---------------------
 
-For use with module `Mapping`, you must change the file `modules/Mapping/Module.php`:
+Some module blocks are not sortable: they use closures instead of a simple
+object/method callable.
+
+So to make them orderable, closures should be replaced by raw callable. For
+example, for module `Mapping`, the file `modules/Mapping/Module.php` must be
+updated:
 ```
 101      $sharedEventManager->attach(
 102         'Omeka\Controller\Site\Item',
@@ -60,8 +65,10 @@ Add:
     }
 ```
 
-The fix is  the same for any module that uses an anonymous function for the
-public trigger `view.show.after`, for example `Collecting`.
+The fix is the same for any module that uses a closure for the public trigger
+`view.show.after`, for example `Collecting`. Furthermore, the namespace of the
+callable that is triggered must be the same than the module name (this is always
+the case).
 
 
 Warning
