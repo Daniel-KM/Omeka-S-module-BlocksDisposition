@@ -8,11 +8,8 @@ return [
         ],
     ],
     'form_elements' => [
-        'invokables' => [
-            Form\ConfigForm::class => Form\ConfigForm::class,
-        ],
         'factories' => [
-            Form\ConfigFormSettings::class => Service\Form\ConfigFormFactory::class,
+            Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
         ],
     ],
     'translator' => [

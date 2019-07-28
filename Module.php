@@ -1,79 +1,53 @@
 <?php
-
+/**
+ * Blocks Disposition
+ *
+ * Manage automatic display of features of the modules in the resource pages.
+ *
+ * @copyright Daniel Berthereau, 2019
+ * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
+ *
+ * This software is governed by the CeCILL license under French law and abiding
+ * by the rules of distribution of free software.  You can use, modify and/ or
+ * redistribute the software under the terms of the CeCILL license as circulated
+ * by CEA, CNRS and INRIA at the following URL "http://www.cecill.info".
+ *
+ * As a counterpart to the access to the source code and rights to copy, modify
+ * and redistribute granted by the license, users are provided only with a
+ * limited warranty and the software's author, the holder of the economic
+ * rights, and the successive licensors have only limited liability.
+ *
+ * In this respect, the user's attention is drawn to the risks associated with
+ * loading, using, modifying and/or developing or reproducing the software by
+ * the user in light of its specific status of free software, that may mean that
+ * it is complicated to manipulate, and that also therefore means that it is
+ * reserved for developers and experienced professionals having in-depth
+ * computer knowledge. Users are therefore encouraged to load and test the
+ * software's suitability as regards their requirements in conditions enabling
+ * the security of their systems and/or data to be ensured and, more generally,
+ * to use and operate it in the same conditions as regards security.
+ *
+ * The fact that you are presently reading this means that you have had
+ * knowledge of the CeCILL license and that you accept its terms.
+ */
 namespace BlocksDisposition;
 
-use BlocksDisposition\Form\ConfigFormSettings;
-use Omeka\Module\AbstractModule;
+if (!class_exists(\Generic\AbstractModule::class)) {
+    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
+        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
+        : __DIR__ . '/src/Generic/AbstractModule.php';
+}
+
+use Generic\AbstractModule;
 use Omeka\Settings\SettingsInterface;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Form\Fieldset;
 use Zend\Mvc\Controller\AbstractController;
-use Zend\ServiceManager\ServiceLocatorInterface;
-use Zend\View\Renderer\PhpRenderer;
 
 class Module extends AbstractModule
 {
-    protected $listenersByEventViewShowAfter = [];
-
-    public function getConfig()
-    {
-        return include __DIR__ . '/config/module.config.php';
-    }
-
-    public function install(ServiceLocatorInterface $serviceLocator)
-    {
-        $this->setServiceLocator($serviceLocator);
-        $this->manageAnySettings($serviceLocator->get('Omeka\Settings'), 'config', 'install', '');
-        $this->manageSiteSettings('install');
-    }
-
-    public function uninstall(ServiceLocatorInterface $serviceLocator)
-    {
-        $this->setServiceLocator($serviceLocator);
-        $this->manageAnySettings($serviceLocator->get('Omeka\Settings'), 'config', 'uninstall', '');
-        $this->manageSiteSettings('uninstall');
-    }
-
-    protected function manageSiteSettings($process, $setValue = null)
-    {
-        $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings\Site');
-        $api = $services->get('Omeka\ApiManager');
-        $sites = $api->search('sites')->getContent();
-        foreach ($sites as $site) {
-            $settings->setTargetId($site->id());
-            $this->manageAnySettings($settings, 'site_settings', $process, $setValue[$site->id()]);
-        }
-    }
-
-    /**
-     * Set or delete all settings of a specific type.
-     *
-     * @param SettingsInterface $settings
-     * @param string $settingsType
-     * @param string $process
-     * @param array $setValue
-     */
-    protected function manageAnySettings(SettingsInterface $settings, $settingsType, $process, $setValue)
-    {
-        $config = require __DIR__ . '/config/module.config.php';
-        $defaultSettings = $config[strtolower(__NAMESPACE__)][$settingsType];
-
-        foreach ($defaultSettings as $name => $value) {
-            switch ($process) {
-                case 'install':
-                    $settings->set($name, $value);
-                    break;
-                case 'uninstall':
-                    $settings->delete($name);
-                    break;
-                case 'update':
-                    $settings->set($name, $setValue[$name]);
-                    break;
-            }
-        }
-    }
+    const NAMESPACE = __NAMESPACE__;
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
     {
@@ -125,21 +99,23 @@ class Module extends AbstractModule
 
         parent::attachListeners($sharedEventManager);
 
+        $listenersByEvent = [];
         $listenersByEvent[$eventName] = $sharedEventManager->getListeners([$identifier], $eventName);
 
-        $serviceLocator = $this->getServiceLocator();
+        $services = $this->getServiceLocator();
 
-        $siteSettings = $serviceLocator->get('Omeka\Settings\Site');
-        $currentSiteSlug = $serviceLocator->get('Application')->getMvcEvent()->getRouteMatch()->getParam('site-slug');
+        $siteSettings = $services->get('Omeka\Settings\Site');
+        $currentSiteSlug = $services->get('Application')->getMvcEvent()->getRouteMatch()->getParam('site-slug');
 
-        $api = $serviceLocator->get('Omeka\ApiManager');
+        $api = $services->get('Omeka\ApiManager');
         $sites = $api->search('sites', ['slug' => $currentSiteSlug])->getContent();
 
         $siteSettings->setTargetId($sites[0]->id());
 
         $blocksdisposition_modules = explode(',', $siteSettings->get($site_settings, 'site_settings'));
-
         $blocksdisposition_modules = json_decode(implode(',', $blocksdisposition_modules));
+
+        $listenersByEventViewShowAfter = [];
 
         foreach ($listenersByEvent as $listeners) {
             foreach ($listeners as $listener) {
@@ -197,94 +173,13 @@ class Module extends AbstractModule
         $this->rewriteListeners('Omeka\Controller\Site\Media', 'view.show.after', 'blocksdisposition_media_show');
     }
 
-    public function getConfigForm(PhpRenderer $renderer)
-    {
-        $services = $this->getServiceLocator();
-
-        $settings = $services->get('Omeka\Settings');
-        $data = $this->prepareDataToPopulate($settings, 'config');
-
-        $view = $renderer;
-        $html = '<p>';
-        $html .= '</p>';
-        $html .= '<p>'
-            . $view->translate('Configure modules settings for display.') // @translate
-            . '</p>';
-
-        $form = $services->get('FormElementManager')->get(ConfigFormSettings::class);
-        $form->init();
-        $form->setData($data);
-        $html .= $renderer->formCollection($form);
-
-        return $html;
-    }
-
-    /**
-     * @param array $params
-     * @return array
-     */
-    public function updateSiteSettingWhenChangeModuleConfig($params)
-    {
-        $serviceLocator = $this->getServiceLocator();
-        $siteSettings = $serviceLocator->get('Omeka\Settings\Site');
-        $settingType = 'site_settings';
-
-        $api = $serviceLocator->get('Omeka\ApiManager');
-        $sites = $api->search('sites')->getContent();
-
-        $site_settings_update = [];
-
-        foreach ($sites as $site_data) {
-            $siteSettings->setTargetId($site_data->id());
-
-            $data = $this->prepareDataToPopulate($siteSettings, $settingType);
-
-            foreach ($data as $site_setting_param => $value) {
-                $settingType = 'site_settings';
-                $blocksdisposition_modules = explode(',', $siteSettings->get($site_setting_param, $settingType));
-
-                foreach ($blocksdisposition_modules as $key => $val) {
-                    if (!in_array($val, $params)) {
-                        unset($blocksdisposition_modules[$key]);
-                    }
-                }
-
-                $site_settings_update[$site_data->id()][$site_setting_param] = implode(',', $blocksdisposition_modules);
-            }
-        }
-
-        return $site_settings_update;
-    }
-
     public function handleConfigForm(AbstractController $controller)
     {
-        $config = include __DIR__ . '/config/module.config.php';
-        $space = strtolower(__NAMESPACE__);
-
-        $services = $this->getServiceLocator();
-
-        $params = $controller->getRequest()->getPost();
-
-        $form = $services->get('FormElementManager')->get(ConfigFormSettings::class);
-        $form->init();
-        $form->setData($params);
-        if (!$form->isValid()) {
-            $controller->messenger()->addErrors($form->getMessages());
+        if (!parent::handleConfigForm($controller)) {
             return false;
         }
 
-        $params = $form->getData();
-
-        $settings = $services->get('Omeka\Settings');
-        $defaultSettings = $config[$space]['config'];
-        $params = array_intersect_key($params, $defaultSettings);
-
-        $this->manageSiteSettings('update', $this->updateSiteSettingWhenChangeModuleConfig($params['blocksdisposition_modules_settings']));
-
-        foreach ($params as $name => $value) {
-            $settings->set($name, $value);
-        }
-
+        $this->updateSiteSettings('blocksdisposition_modules_settings');
         return true;
     }
 
@@ -294,7 +189,7 @@ class Module extends AbstractModule
 
         $settingType = 'config';
         $settings = $services->get('Omeka\Settings');
-        $config_data = $this->prepareDataToPopulate($settings, $settingType);
+        $configData = $this->prepareDataToPopulate($settings, $settingType);
 
         $settingType = 'site_settings';
         $settings = $services->get('Omeka\Settings\Site');
@@ -307,12 +202,11 @@ class Module extends AbstractModule
         $space = strtolower(__NAMESPACE__);
 
         $fieldset = new Fieldset();
-
         $fieldset
             ->setName($space)
             ->setLabel('Blocks Disposition');
 
-        $blocks_title_value = [
+        $blocksTitleValue = [
             'For item browse', // @translate
             'For item show', // @translate
             'For item set browse', // @translate
@@ -320,7 +214,7 @@ class Module extends AbstractModule
             'For media show', // @translate
         ];
 
-        $blocks_title = [];
+        $blocksTitle = [];
         $i = 0;
 
         foreach ($defaultSettings as $name => $value) {
@@ -333,7 +227,7 @@ class Module extends AbstractModule
                 ],
             ]);
 
-            $blocks_title[$name] = $blocks_title_value[$i];
+            $blocksTitle[$name] = $blocksTitleValue[$i];
             ++$i;
         }
 
@@ -342,7 +236,7 @@ class Module extends AbstractModule
                 'type' => 'hidden',
                 'name' => 'blocks_title',
                 'attributes' => [
-                    'value' => json_encode($blocks_title),
+                    'value' => json_encode($blocksTitle),
                     'class' => 'blocks_title',
                 ],
             ])
@@ -350,7 +244,7 @@ class Module extends AbstractModule
                 'type' => 'hidden',
                 'name' => 'blocksdisposition_modules_from_config',
                 'attributes' => [
-                    'value' => json_encode($config_data['blocksdisposition_modules_settings']),
+                    'value' => json_encode($configData['blocksdisposition_modules_settings']),
                     'class' => 'blocksdisposition_modules_from_config',
                 ],
             ]);
@@ -361,32 +255,34 @@ class Module extends AbstractModule
     }
 
     /**
-     * Prepare data for a form or a fieldset.
+     * Update sites settings according to a main setting.
      *
-     * To be overridden by module for specific keys.
-     *
-     * @todo Use form methods to populate.
-     *
-     * @param SettingsInterface $settings
-     * @param string $settingsType
-     * @return array
+     * @param string $name
      */
-    protected function prepareDataToPopulate(SettingsInterface $settings, $settingsType)
+    protected function updateSiteSettings($name)
     {
-        $config = include __DIR__ . '/config/module.config.php';
-        $space = strtolower(__NAMESPACE__);
-        if (empty($config[$space][$settingsType])) {
-            return [];
+        $services = $this->getServiceLocator();
+        $settings = $services->get('Omeka\Settings');
+        $siteSettings = $services->get('Omeka\Settings\Site');
+        $api = $services->get('Omeka\ApiManager');
+
+        $modules = $settings->get('blocksdisposition_modules_settings', []);
+
+        $sites = $api->search('sites')->getContent();
+        foreach ($sites as $site) {
+            $id = $site->id();
+            $siteSettings->setTargetId($id);
+            $this->initDataToPopulate($siteSettings, 'site_settings', $id);
+            $data = $this->prepareDataToPopulate($settings, 'site_settings');
+            foreach (array_keys($data) as $name) {
+                $moduleBlocks = json_decode($siteSettings->get($name), true) ?: [];
+                foreach ($moduleBlocks as $key => $module) {
+                    if (!in_array($module, $modules)) {
+                        unset($moduleBlocks[$key]);
+                    }
+                }
+                $siteSettings->set($name, json_encode(array_values($moduleBlocks)));
+            }
         }
-
-        $defaultSettings = $config[$space][$settingsType];
-
-        $data = [];
-        foreach ($defaultSettings as $name => $value) {
-            $val = $settings->get($name, $value);
-            $data[$name] = $val;
-        }
-
-        return $data;
     }
 }
