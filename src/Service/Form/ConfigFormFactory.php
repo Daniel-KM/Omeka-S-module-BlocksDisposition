@@ -13,7 +13,7 @@ class ConfigFormFactory implements FactoryInterface
             ->getModulesByState(\Omeka\Module\Manager::STATE_ACTIVE);
         unset($activeModules['BlocksDisposition']);
 
-        $activeModules = array_combine(array_keys($activeModules), array_map(function($v) {
+        $activeModules = array_combine(array_keys($activeModules), array_map(function ($v) {
             return $v->getName();
         }, $activeModules));
 

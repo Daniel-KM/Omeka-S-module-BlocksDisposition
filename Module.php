@@ -137,7 +137,7 @@ class Module extends AbstractModule
 
     public function handleViewBrowseBeforeItem(Event $event)
     {
-        $this->rewriteListeners( 'Omeka\Controller\Site\Item', 'view.browse.after', 'blocksdisposition_item_browse');
+        $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.browse.after', 'blocksdisposition_item_browse');
     }
 
     public function handleViewBrowseBeforeItemSet(Event $event)
