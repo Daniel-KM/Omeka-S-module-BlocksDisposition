@@ -27,11 +27,11 @@ return [
             'blocksdisposition_modules' => [],
         ],
         'site_settings' => [
-            'blocksdisposition_item_browse' => null,
-            'blocksdisposition_item_show' => null,
-            'blocksdisposition_item_set_browse' => null,
-            'blocksdisposition_item_set_show' => null,
-            'blocksdisposition_media_show' => null,
+            'blocksdisposition_item_browse' => [],
+            'blocksdisposition_item_show' => [],
+            'blocksdisposition_item_set_browse' => [],
+            'blocksdisposition_item_set_show' => [],
+            'blocksdisposition_media_show' => [],
         ],
     ],
 ];

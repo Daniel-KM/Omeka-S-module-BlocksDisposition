@@ -1,7 +1,9 @@
 $(document).ready(function () {
 
+    var blocksdisposition = $('#blocksdisposition');
     var site_settings_blocks = [];
-    var blocks_title = $.parseJSON($('.blocks_title').val());
+    var blocks_title = blocksdisposition.data('block-titles');
+    var available_modules = blocksdisposition.data('modules');
 
     $.each(blocks_title, function (key, val) {
         site_settings_blocks.push({
@@ -11,31 +13,31 @@ $(document).ready(function () {
         });
     });
 
-    $('.blocksdisposition_modules_from_config').parent().addClass('blocksdisposition-module-group-fields');
-
-    var available_modules = $.parseJSON($('.blocksdisposition_modules_from_config').val());
     // Make html block for available modules.
-    var available_modules_html = '<div>';
-
+    var available_modules_html = '<div>' + "\n";
     $.each(available_modules, function (key, val) {
-        available_modules_html += '<div class="field js-module-' + val + '"><a class="button">' + val + '</a><div class="js-module-position">0</div></div>';
+        available_modules_html += '<div class="field js-module js-module-' + val + '">' + "\n"
+           + '  <a class="button">' + val + '</a>' + "\n"
+           + '  <div class="js-module-position">0</div>' + "\n"
+           + '</div>' + "\n";
     })
     available_modules_html += '</div>';
 
     $.each(site_settings_blocks, function (key, val) {
         var block_settings = [];
-        if ($('.' + val.name).val().length > 0) {
-            block_settings = $.parseJSON($('.' + val.name).val());
+        if ($('#' + val.name).val().length > 0) {
+            block_settings = $.parseJSON($('#' + val.name).val());
+            // Remove empty values that may exists.
+            block_settings = block_settings.filter(item => item);
         }
 
-        site_settings_blocks[key].block_settings = $('.' + val.name).val();
+        site_settings_blocks[key].block_settings = $('#' + val.name).val();
+        var site_settings_blocks_html = '<div class="block-for js-' + val.name + '" data-block-name="' + val.name + '">' + "\n"
+            + '  <div class="block_title">' + val.title + '</div>' + "\n"
+            + '  <div class="block_buttons"></div>' + "\n"
+            + '</div>' + "\n";
 
-        var site_settings_blocks_html = '<div class="block-for js-' + val.name + '" attr-block-name="' + val.name + '">';
-        site_settings_blocks_html += '<div class="block_title">' + val.title + '</div>';
-        site_settings_blocks_html += '<div class="block_buttons"></div>';
-        site_settings_blocks_html += '</div>';
-
-        $('.blocksdisposition-module-group-fields').append(site_settings_blocks_html);
+        blocksdisposition.append(site_settings_blocks_html);
         $('.js-' + val.name + ' .block_buttons').append(available_modules_html);
 
         // Set active buttons for block settings.
@@ -45,25 +47,25 @@ $(document).ready(function () {
             $('.js-' + val.name + ' .block_buttons .js-module-' + block_name + ' a').addClass('active');
             $('.js-' + val.name + ' .block_buttons .js-module-' + block_name + ' .js-module-position').addClass('active').html(block_position);
         });
-        $('.js-' + val.name).attr('attr-count-selected', block_position);
+        $('.js-' + val.name).attr('data-count-selected', block_position);
     });
 
-    $('.blocksdisposition-module-group-fields .button').click(function () {
+    blocksdisposition.find('.button').click(function () {
         $(this).toggleClass('active');
         $(this).parent().find('.js-module-position').toggleClass('active');
-        var attr_block_name = $(this).parent().parent().parent().parent().attr('attr-block-name');
+        var attr_block_name = $(this).parent().parent().parent().parent().attr('data-block-name');
         rerange_modules($(this).html(), attr_block_name);
     });
 
     function rerange_modules(clicked_module, attr_block_name) {
         var current_element = $('.js-' + attr_block_name + ' .js-module-' + clicked_module + ' .js-module-position');
         var all_element_in_block = $('.js-' + attr_block_name + ' .js-module-position');
-        var attr_count_selected = $('.js-' + attr_block_name).attr('attr-count-selected');
+        var count_selected = $('.js-' + attr_block_name).attr('data-count-selected');
         var new_block_value = [];
 
         if (current_element.hasClass('active')) {
-            ++attr_count_selected;
-            current_element.html(attr_count_selected);
+            ++count_selected;
+            current_element.html(count_selected);
 
             $.each(all_element_in_block, function (key, val) {
                 var get_element_count = parseInt($(this).html());
@@ -72,7 +74,7 @@ $(document).ready(function () {
                 }
             });
         } else {
-            --attr_count_selected;
+            --count_selected;
             var current_element_value = current_element.html();
             current_element.html(0);
 
@@ -88,10 +90,26 @@ $(document).ready(function () {
             });
         }
 
-        new_block_value.shift();
-        var json_string = JSON.stringify(new_block_value);
-        $('.'+attr_block_name).val(json_string);
-        $('.js-' + attr_block_name).attr('attr-count-selected', attr_count_selected);
+        new_block_value = new_block_value.filter(item => item);
+        // var json_string = JSON.stringify(new_block_value);
+        var json_string = new_block_value;
+        $('#' + attr_block_name).val(json_string);
+        $('.js-' + attr_block_name).attr('data-count-selected', count_selected);
+
+        // Save the data via the sorted hidden checkboxes: simply set new names.
+        var inputs = blocksdisposition.find('input[name="blocksdisposition[' + attr_block_name + '][]"]').closest('.field');
+        $.each(new_block_value, function (key, val) {
+            inputs.find('input[type=checkbox][name="blocksdisposition[' + attr_block_name + '][]"]')
+                .slice(key, key + 1)
+                .prop('value', val).prop('checked', true).html(val);
+        });
+        $.each(available_modules, function (key, val) {
+            if (new_block_value.indexOf(val) < 0) {
+                inputs.find('input[type=checkbox][name="blocksdisposition[' + attr_block_name + '][]"]')
+                    .slice(key + new_block_value.length, key + 1 + new_block_value.length)
+                    .prop('value', val).prop('checked', false).html(val);
+            }
+        });
     }
 
 });

@@ -39,7 +39,6 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
-use Omeka\Settings\SettingsInterface;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Form\Fieldset;
@@ -52,68 +51,67 @@ class Module extends AbstractModule
     public function attachListeners(SharedEventManagerInterface $sharedEventManager)
     {
         $sharedEventManager->attach(
-            \Omeka\Form\SiteSettingsForm::class,
-            'form.add_elements',
-            [$this, 'handleSiteSettings']
-        );
-
-        $sharedEventManager->attach(
             'Omeka\Controller\Site\Item',
             'view.show.before',
             [$this, 'handleViewShowBeforeItem'],
             -1000
         );
-
         $sharedEventManager->attach(
             'Omeka\Controller\Site\Item',
             'view.browse.before',
             [$this, 'handleViewBrowseBeforeItem'],
             -1000
         );
-
         $sharedEventManager->attach(
             'Omeka\Controller\Site\ItemSet',
             'view.browse.before',
             [$this, 'handleViewBrowseBeforeItemSet'],
             -1000
         );
-
         $sharedEventManager->attach(
             'Omeka\Controller\Site\ItemSet',
             'view.show.before',
             [$this, 'handleViewShowBeforeItemSet'],
             -1000
         );
-
         $sharedEventManager->attach(
             'Omeka\Controller\Site\Media',
             'view.show.before',
             [$this, 'handleViewShowBeforeMedia'],
             -1000
         );
+
+        $sharedEventManager->attach(
+            \Omeka\Form\SiteSettingsForm::class,
+            'form.add_elements',
+            [$this, 'handleSiteSettings']
+        );
+        $sharedEventManager->attach(
+            \Omeka\Form\SiteSettingsForm::class,
+            'form.add_input_filters',
+            [$this, 'handleSiteSettingsFilters']
+        );
     }
 
-    public function rewriteListeners($identifier, $eventName, $site_settings)
+    /**
+     * Enable, disable and reorder modules according to the sie settings.
+     *
+     * @param string $identifier Event identifier (controller)
+     * @param string $eventName
+     * @param string $siteSettingName
+     */
+    protected function rewriteListeners($identifier, $eventName, $siteSettingName)
     {
-        $sharedEventManager = $this->getServiceLocator()->get('SharedEventManager');
+        $services = $this->getServiceLocator();
+        $sharedEventManager = $services->get('SharedEventManager');
 
         parent::attachListeners($sharedEventManager);
 
+        // The current site is automatically set.
+        $modules = $services->get('Omeka\Settings\Site')->get($siteSettingName, []);
+
         $listenersByEvent = [];
         $listenersByEvent[$eventName] = $sharedEventManager->getListeners([$identifier], $eventName);
-
-        $services = $this->getServiceLocator();
-
-        $siteSettings = $services->get('Omeka\Settings\Site');
-        $currentSiteSlug = $services->get('Application')->getMvcEvent()->getRouteMatch()->getParam('site-slug');
-
-        $api = $services->get('Omeka\ApiManager');
-        $sites = $api->search('sites', ['slug' => $currentSiteSlug])->getContent();
-
-        $siteSettings->setTargetId($sites[0]->id());
-
-        $blocksdisposition_modules = explode(',', $siteSettings->get($site_settings, 'site_settings'));
-        $blocksdisposition_modules = json_decode(implode(',', $blocksdisposition_modules));
 
         $listenersByEventViewShowAfter = [];
 
@@ -135,13 +133,13 @@ class Module extends AbstractModule
             }
         }
 
-        if (isset($blocksdisposition_modules)) {
-            foreach ($blocksdisposition_modules as $val) {
-                if (isset($listenersByEventViewShowAfter[$val][0])) {
+        if (count($modules)) {
+            foreach ($modules as $module) {
+                if (isset($listenersByEventViewShowAfter[$module][0])) {
                     $sharedEventManager->attach(
                         $identifier,
                         $eventName,
-                        [$listenersByEventViewShowAfter[$val][0], $listenersByEventViewShowAfter[$val][1]]
+                        [$listenersByEventViewShowAfter[$module][0], $listenersByEventViewShowAfter[$module][1]]
                     );
                 }
             }
@@ -155,7 +153,7 @@ class Module extends AbstractModule
 
     public function handleViewBrowseBeforeItem(Event $event)
     {
-        $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.browse.after', 'blocksdisposition_item_browse');
+        $this->rewriteListeners( 'Omeka\Controller\Site\Item', 'view.browse.after', 'blocksdisposition_item_browse');
     }
 
     public function handleViewBrowseBeforeItemSet(Event $event)
@@ -186,72 +184,97 @@ class Module extends AbstractModule
     public function handleSiteSettings(Event $event)
     {
         $services = $this->getServiceLocator();
+        $space = strtolower(__NAMESPACE__);
 
-        $settingType = 'config';
         $settings = $services->get('Omeka\Settings');
-        $configData = $this->prepareDataToPopulate($settings, $settingType);
+        $modules = $settings->get('blocksdisposition_modules', []);
 
         $settingType = 'site_settings';
         $settings = $services->get('Omeka\Settings\Site');
-
         $data = $this->prepareDataToPopulate($settings, $settingType);
 
-        $config = require __DIR__ . '/config/module.config.php';
-        $defaultSettings = $config[strtolower(__NAMESPACE__)][$settingType];
 
-        $space = strtolower(__NAMESPACE__);
+        $translator = $services->get('MvcTranslator');
+        $blockTitles = [
+            'blocksdisposition_item_browse' => $translator->translate('For item browse'), // @translate
+            'blocksdisposition_item_show' => $translator->translate('For item show'), // @translate
+            'blocksdisposition_item_set_browse' => $translator->translate('For item set browse'), // @translate
+            'blocksdisposition_item_set_show' => $translator->translate('For item set show'), // @translate
+            'blocksdisposition_media_show' => $translator->translate('For media show'), // @translate
+        ];
 
         $fieldset = new Fieldset();
         $fieldset
             ->setName($space)
-            ->setLabel('Blocks Disposition');
+            ->setLabel('Blocks Disposition')
+            ->setAttribute('id', $space)
+            ->setAttribute('data-block-titles', json_encode($blockTitles))
+            ->setAttribute('data-modules', json_encode($modules));
 
-        $blocksTitleValue = [
-            'For item browse', // @translate
-            'For item show', // @translate
-            'For item set browse', // @translate
-            'For item set show', // @translate
-            'For media show', // @translate
-        ];
-
-        $blocksTitle = [];
-        $i = 0;
-
-        foreach (array_keys($defaultSettings) as $name) {
+        // Hidden doesn't support multiple ordered values in Zend, so a
+        // multicheckbox is added. The hidden values are not saved, because Zend
+        // wraps the name with the fieldset name.
+        // TODO Finalize the js (sort checkbox + enable/disable) so the hidden inputs won't be needed anymore.
+        $dataToPopulate = [];
+        foreach ($data as $name => $value) {
             $fieldset->add([
+                'name' => $name . '-hide[]',
                 'type' => \Zend\Form\Element\Hidden::class,
+                'attributes' => [
+                    'id' => $name,
+                    'value' => '',
+                ],
+            ]);
+
+            $val = is_array($value) ? json_encode($value) : $value;
+            $dataToPopulate[$name . '-hide[]'] = $val;
+            $val = is_array($value) ? $value : explode(',', $value);
+            $dataToPopulate[$name] = $val;
+            $val = array_combine($val, $val) + array_combine($modules, $modules);
+
+            $fieldset->add([
                 'name' => $name,
+                'type' => \Zend\Form\Element\MultiCheckbox::class,
+                'options' => [
+                    'label' => $blockTitles[$name],
+                    // Set initial order, even if js does it.
+                    'value_options' => $val,
+                ],
                 'attributes' => [
-                    'value' => 0,
-                    'class' => $name,
+                    // No id: it works only on the first, and it's hidden.
                 ],
             ]);
-
-            $blocksTitle[$name] = $blocksTitleValue[$i];
-            ++$i;
         }
-
-        $fieldset
-            ->add([
-                'type' => \Zend\Form\Element\Hidden::class,
-                'name' => 'blocks_title',
-                'attributes' => [
-                    'value' => json_encode($blocksTitle),
-                    'class' => 'blocks_title',
-                ],
-            ])
-            ->add([
-                'type' => \Zend\Form\Element\Hidden::class,
-                'name' => 'blocksdisposition_modules_from_config',
-                'attributes' => [
-                    'value' => json_encode($configData['blocksdisposition_modules']),
-                    'class' => 'blocksdisposition_modules_from_config',
-                ],
-            ]);
 
         $form = $event->getTarget();
         $form->add($fieldset);
-        $form->get($space)->populateValues($data);
+        $form->get($space)->populateValues($dataToPopulate);
+    }
+
+    public function handleSiteSettingsFilters(Event $event)
+    {
+        $inputFilter = $event->getParam('inputFilter');
+        $inputFilter->get('blocksdisposition')
+            ->add([
+                'name' => 'blocksdisposition_item_browse',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'blocksdisposition_item_show',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'blocksdisposition_item_set_browse',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'blocksdisposition_item_set_show',
+                'required' => false,
+            ])
+            ->add([
+                'name' => 'blocksdisposition_media_show',
+                'required' => false,
+            ]);
     }
 
     /**
@@ -266,22 +289,20 @@ class Module extends AbstractModule
         $siteSettings = $services->get('Omeka\Settings\Site');
         $api = $services->get('Omeka\ApiManager');
 
-        $modules = $settings->get('blocksdisposition_modules', []);
+        $modules = $settings->get('blocksdisposition_modules') ?: [];
 
         $sites = $api->search('sites')->getContent();
         foreach ($sites as $site) {
             $id = $site->id();
             $siteSettings->setTargetId($id);
             $this->initDataToPopulate($siteSettings, 'site_settings', $id);
-            $data = $this->prepareDataToPopulate($settings, 'site_settings');
+            $data = $this->prepareDataToPopulate($siteSettings, 'site_settings');
+            // Don't update empty values: nothing can be removed.
+            $data = array_filter($data);
             foreach (array_keys($data) as $name) {
-                $moduleBlocks = json_decode($siteSettings->get($name), true) ?: [];
-                foreach ($moduleBlocks as $key => $module) {
-                    if (!in_array($module, $modules)) {
-                        unset($moduleBlocks[$key]);
-                    }
-                }
-                $siteSettings->set($name, json_encode(array_values($moduleBlocks)));
+                $moduleBlocks = $siteSettings->get($name) ?: [];
+                $moduleBlocks = array_intersect($moduleBlocks, $modules);
+                $siteSettings->set($name, array_values($moduleBlocks));
             }
         }
     }

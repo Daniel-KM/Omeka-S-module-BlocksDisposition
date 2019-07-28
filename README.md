@@ -34,7 +34,7 @@ Then, the options can be set differently for each site in the site settings,
 under  `Blocks Disposition`. Simply enable and set the order of each feature for
 each type of page.
 
-The process uses the trigger `view.show.after`, so it must not be removed from
+The process uses the trigger `view.show.before`, so it must not be removed from
 the theme.
 
 

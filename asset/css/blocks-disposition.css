@@ -1,14 +1,12 @@
-.blocksdisposition-module-group-fields .field {
+#blocksdisposition .field {
     width: auto;
     display: inline-flex;
     background-color: transparent;
 }
-
-.blocksdisposition-module-group-fields .button.active {
+#blocksdisposition .button.active {
     outline: -webkit-focus-ring-color auto 5px;
 }
-
-.blocksdisposition-module-group-fields .js-module-position {
+#blocksdisposition .js-module-position {
     position: absolute;
     right: 0px;
     top: -4px;
@@ -21,18 +19,22 @@
     color: green;
     line-height: 22px;
 }
-
-.blocksdisposition-module-group-fields .js-module-position.active {
+#blocksdisposition .js-module-position.active {
     display: block;
 }
-
-.block-for {
+#blocksdisposition .block-for {
     display: flex;
 }
-
-.block-for .block_title {
+#blocksdisposition .block-for .block_title {
     margin-top: 10px;
     width: 152px;
     text-align: right;
     margin-right: 10px;
+}
+#blocksdisposition .field {
+    display: none;
+    color:red;
+}
+#blocksdisposition .js-module {
+    display: inline-flex;
 }
