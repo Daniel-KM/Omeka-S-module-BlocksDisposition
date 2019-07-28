@@ -179,7 +179,7 @@ class Module extends AbstractModule
             return false;
         }
 
-        $this->updateSiteSettings('blocksdisposition_modules_settings');
+        $this->updateSiteSettings('blocksdisposition_modules');
         return true;
     }
 
@@ -244,7 +244,7 @@ class Module extends AbstractModule
                 'type' => \Zend\Form\Element\Hidden::class,
                 'name' => 'blocksdisposition_modules_from_config',
                 'attributes' => [
-                    'value' => json_encode($configData['blocksdisposition_modules_settings']),
+                    'value' => json_encode($configData['blocksdisposition_modules']),
                     'class' => 'blocksdisposition_modules_from_config',
                 ],
             ]);
@@ -266,7 +266,7 @@ class Module extends AbstractModule
         $siteSettings = $services->get('Omeka\Settings\Site');
         $api = $services->get('Omeka\ApiManager');
 
-        $modules = $settings->get('blocksdisposition_modules_settings', []);
+        $modules = $settings->get('blocksdisposition_modules', []);
 
         $sites = $api->search('sites')->getContent();
         foreach ($sites as $site) {

@@ -24,7 +24,7 @@ return [
     ],
     'blocksdisposition' => [
         'config' => [
-            'blocksdisposition_modules_settings' => [],
+            'blocksdisposition_modules' => [],
         ],
         'site_settings' => [
             'blocksdisposition_item_browse' => null,

@@ -11,7 +11,7 @@ class ConfigForm extends Form
     public function init()
     {
         $this->add([
-                'name' => 'blocksdisposition_modules_settings',
+                'name' => 'blocksdisposition_modules',
                 'type' => Element\Select::class,
                 'options' => [
                     'label' => 'Modules used in resource views', // @translate
@@ -21,7 +21,7 @@ class ConfigForm extends Form
                     'empty_option' => '',
                 ],
                 'attributes' => [
-                    'id' => 'blocksdisposition_modules_settings',
+                    'id' => 'blocksdisposition_modules',
                     'class' => 'chosen-select',
                     'multiple' => true,
                     'data-placeholder' => 'Select modules…', // @translate
