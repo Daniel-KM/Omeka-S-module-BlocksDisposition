@@ -91,23 +91,24 @@ $(document).ready(function () {
         }
 
         new_block_value = new_block_value.filter(item => item);
-        // var json_string = JSON.stringify(new_block_value);
-        var json_string = new_block_value;
-        $('#' + attr_block_name).val(json_string);
+        $('#' + attr_block_name).val(new_block_value);
         $('.js-' + attr_block_name).attr('data-count-selected', count_selected);
 
         // Save the data via the sorted hidden checkboxes: simply set new names.
         var inputs = blocksdisposition.find('input[name="blocksdisposition[' + attr_block_name + '][]"]').closest('.field');
+        // Set all values to false to avoid some checks.
+        inputs.find('input.module-sort')
+            .prop('checked', false);
         $.each(new_block_value, function (key, val) {
-            inputs.find('input[type=checkbox][name="blocksdisposition[' + attr_block_name + '][]"]')
+            inputs.find('input.module-sort')
                 .slice(key, key + 1)
-                .prop('value', val).prop('checked', true).html(val);
+                .prop('checked', true).prop('value', val).html(val);
         });
         $.each(available_modules, function (key, val) {
             if (new_block_value.indexOf(val) < 0) {
-                inputs.find('input[type=checkbox][name="blocksdisposition[' + attr_block_name + '][]"]')
+                inputs.find('input.module-sort')
                     .slice(key + new_block_value.length, key + 1 + new_block_value.length)
-                    .prop('value', val).prop('checked', false).html(val);
+                    .prop('checked', false).prop('value', val).html(val);
             }
         });
     }

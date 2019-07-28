@@ -212,11 +212,11 @@ class Module extends AbstractModule
                 ],
             ]);
 
-            $val = is_array($value) ? json_encode($value) : $value;
-            $dataToPopulate[$name . '-hide[]'] = $val;
-            $val = is_array($value) ? $value : explode(',', $value);
-            $dataToPopulate[$name] = $val;
-            $val = array_combine($val, $val) + array_combine($modules, $modules);
+            $value = is_array($value) ? $value : explode(',', $value);
+            $value = array_values(array_unique($value));
+            $dataToPopulate[$name . '-hide[]'] = json_encode($value);
+            $dataToPopulate[$name] = $value;
+            $valueOptions = array_combine($value, $value) + array_combine($modules, $modules);
 
             $fieldset->add([
                 'name' => $name,
@@ -224,10 +224,11 @@ class Module extends AbstractModule
                 'options' => [
                     'label' => $blockTitles[$name],
                     // Set initial order, even if js does it.
-                    'value_options' => $val,
+                    'value_options' => $valueOptions,
                 ],
                 'attributes' => [
                     // No id: it works only on the first, and it's hidden.
+                    'class' => 'module-sort',
                 ],
             ]);
         }
@@ -287,7 +288,7 @@ class Module extends AbstractModule
             $data = array_filter($data);
             foreach (array_keys($data) as $name) {
                 $moduleBlocks = $siteSettings->get($name) ?: [];
-                $moduleBlocks = array_intersect($moduleBlocks, $modules);
+                $moduleBlocks = array_unique(array_intersect($moduleBlocks, $modules));
                 $siteSettings->set($name, array_values($moduleBlocks));
             }
         }
