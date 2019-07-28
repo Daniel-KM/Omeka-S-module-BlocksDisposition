@@ -7,9 +7,10 @@ display of features of the modules in the resource pages.
 For example, it can display the viewer [Mirador] or [Universal Viewer], then the
 citation provided by the module [Citation], then the map of the module [Mapping].
 then the tagging form of the module [Folksonomy], then the comments of the
-module [Comment], etc.
+module [Comment], etc. Without this module, these features would be displayed in
+the alphabetic order, so the theme would be edited to get the same result.
 
-So it simplifies the creation of the five main public views (`item/show`,
+So, this module simplifies the creation of the five main public views (`item/show`,
 `item/browse`, `item-set/show`, `item-set/browse`, `media/show`), and make them
 reorderable directly in the admin interface, like the simple pages.
 
@@ -26,28 +27,29 @@ See general end user documentation for [Installing a module].
 Usage
 -----
 
-First, set the modules that will be available for config in the module config form.
-This module is not yet enable to determine all modules that are used in the
-public resources pages.
+First, set the modules that will be available for config in the module config
+form. This module is not yet enable to determine all modules that are used in
+the public resources pages.
 
 Then, the options can be set differently for each site in the site settings,
 under  `Blocks Disposition`. Simply enable and set the order of each feature for
 each type of page.
 
-The process uses the trigger `view.show.before`, so it must not be removed from
-the theme.
+The process uses the trigger `view.show.before` to reorder the modules that use
+the trigger `view.show.after`, so they must not be removed from the theme. It is
+the same for the triggers `view.browse.before` and `view.browse.after`.
 
 
 Compatibility warning
 ---------------------
 
-Some module blocks are not sortable: they use closures instead of a simple
-object/method callable.
+Some module blocks are not sortable, because they use closures instead of a
+simple object/method callable, so the module doesn’t know the initial module.
 
 So to make them orderable, closures should be replaced by raw callable. For
-example, for module `Mapping`, the file `modules/Mapping/Module.php` must be
-updated:
-```
+example, for module [Mapping], the method `attachListeners()` in the main file
+of the module `modules/Mapping/Module.php` must be updated:
+```diff
 101      $sharedEventManager->attach(
 102         'Omeka\Controller\Site\Item',
 103            'view.show.after',
@@ -65,19 +67,13 @@ Add:
     }
 ```
 
-The fix is the same for any module that uses a closure for the public trigger
-`view.show.after`, for example `Collecting`. Furthermore, the namespace of the
-callable that is triggered must be the same than the module name (this is always
-the case).
+This process creates a cleaner code too, since loading step is not mixed with
+the display step in the same method. This fix is the same for any module that
+uses a closure for the public trigger `view.show.after`, for example [Collecting].
 
-
-Warning
--------
-
-Use it at your own risk.
-
-It’s always recommended to backup your files and your databases and to check
-your archives regularly so you can roll back if needed.
+Another point to check is the fact that the namespace of the callable that is
+triggered must be the same than the module name. This is always the case for all
+known public modules.
 
 
 Warning
@@ -132,6 +128,8 @@ Copyright
 [Mapping]: https://github.com/omeka-s-modules/Mapping
 [Folksonomy]: https://github.com/Daniel-KM/Omeka-S-module-Folksonomy
 [Comment]: https://github.com/Daniel-KM/Omeka-S-module-Comment
+[Collecting]: https://github.com/omeka-s-modules/Collecting
+[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
