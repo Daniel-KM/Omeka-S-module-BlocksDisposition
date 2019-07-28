@@ -17,16 +17,51 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: Module.php:213
-msgid "Configure modules settings for display."
+#: Module.php:182
+msgid "For item browse"
+msgstr ""
+
+#: Module.php:183
+msgid "For item show"
+msgstr ""
+
+#: Module.php:184
+msgid "For item set browse"
+msgstr ""
+
+#: Module.php:185
+msgid "For item set show"
+msgstr ""
+
+#: Module.php:186
+msgid "For media show"
+msgstr ""
+
+#: src/Generic/AbstractModule.php:474
+#, php-format
+msgid "This module requires the module \"%s\"."
+msgstr ""
+
+#: src/Generic/AbstractModule.php:494
+#, php-format
+msgid "This module requires modules \"%s\"."
+msgstr ""
+
+#: src/Generic/AbstractModule.php:562
+#, php-format
+msgid ""
+"The module \"%s\" was automatically deactivated because the dependencies are "
+"unavailable."
 msgstr ""
 
 #: src/Form/ConfigForm.php:17
-msgid "BlocksDisposition modules for view"
+msgid "Modules used in resource views"
 msgstr ""
 
 #: src/Form/ConfigForm.php:18
-msgid "Read the doc."
+msgid ""
+"List all modules that use the trigger \"view.show.after\" and that may be "
+"displayed and ordered."
 msgstr ""
 
 #: src/Form/ConfigForm.php:27
