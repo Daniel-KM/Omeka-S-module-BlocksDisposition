@@ -217,9 +217,9 @@ class Module extends AbstractModule
         $blocksTitle = [];
         $i = 0;
 
-        foreach ($defaultSettings as $name => $value) {
+        foreach (array_keys($defaultSettings) as $name) {
             $fieldset->add([
-                'type' => 'hidden',
+                'type' => \Zend\Form\Element\Hidden::class,
                 'name' => $name,
                 'attributes' => [
                     'value' => 0,
@@ -233,7 +233,7 @@ class Module extends AbstractModule
 
         $fieldset
             ->add([
-                'type' => 'hidden',
+                'type' => \Zend\Form\Element\Hidden::class,
                 'name' => 'blocks_title',
                 'attributes' => [
                     'value' => json_encode($blocksTitle),
@@ -241,7 +241,7 @@ class Module extends AbstractModule
                 ],
             ])
             ->add([
-                'type' => 'hidden',
+                'type' => \Zend\Form\Element\Hidden::class,
                 'name' => 'blocksdisposition_modules_from_config',
                 'attributes' => [
                     'value' => json_encode($configData['blocksdisposition_modules_settings']),

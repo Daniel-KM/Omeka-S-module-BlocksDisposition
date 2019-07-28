@@ -1,8 +1,8 @@
 <?php
 namespace BlocksDisposition\Form;
 
-use Zend\Form\Form;
 use Zend\Form\Element;
+use Zend\Form\Form;
 
 class ConfigForm extends Form
 {
@@ -14,9 +14,9 @@ class ConfigForm extends Form
                 'name' => 'blocksdisposition_modules_settings',
                 'type' => Element\Select::class,
                 'options' => [
-                    'label' => 'BlocksDisposition modules for view', // @translate
-                    'info' => 'Read the doc.', // @translate
-                    'documentation' => '',
+                    'label' => 'Modules used in resource views', // @translate
+                    'info' => 'List all the module that used the trigger "view.show.after" and that may be displayed and ordered.', // @translate
+                    'documentation' => 'https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition',
                     'value_options' => $this->getModules(),
                     'empty_option' => '',
                 ],
