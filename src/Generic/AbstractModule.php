@@ -28,7 +28,6 @@
 
 namespace Generic;
 
-// use Omeka\Module\AbstractModule;
 use Omeka\Module\Exception\ModuleCannotInstallException;
 use Omeka\Settings\SettingsInterface;
 use Omeka\Stdlib\Message;
@@ -98,6 +97,9 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         if (!$formManager->has($formClass)) {
             return '';
         }
+
+        // Simplify config of modules.
+        $renderer->ckEditor();
 
         $settings = $services->get('Omeka\Settings');
 
@@ -403,7 +405,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
         $data = [];
         foreach ($defaultSettings as $name => $value) {
-            $val = $settings->get($name, $value);
+            $val = $settings->get($name, is_array($value) ? [] : null);
             $data[$name] = $val;
         }
 
@@ -415,7 +417,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
      *
      * If the default settings were never registered, it means an incomplete
      * config, install or upgrade, or a new site or a new user. In all cases,
-     * check it and save defauilt value first.
+     * check it and save default value first.
      *
      * @param SettingsInterface $settings
      * @param string $settingsType
@@ -447,9 +449,19 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             $sql = sprintf('SELECT id, value FROM %s', $settings->getTableName());
             $stmt = $connection->query($sql);
         }
+
         $currentSettings = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
         $defaultSettings = $config[$space][$settingsType];
+        // Skip settings that are arrays, because the fields "multi-checkbox"
+        // and "multi-select" are removed when no value are selected, so it's
+        // not possible to determine if it's a new setting or an old empty
+        // setting currently. So fill them via upgrade in that case.
+        // TODO Find a way to save empty multi-checkboxes and multi-selects (core fix).
+        $defaultSettings = array_filter($defaultSettings, function ($v) {
+            return !is_array($v);
+        });
         $missingSettings = array_diff_key($defaultSettings, $currentSettings);
+
         foreach ($missingSettings as $name => $value) {
             $settings->set($name, $value);
         }
