@@ -82,6 +82,11 @@ class Module extends AbstractModule
         );
 
         $sharedEventManager->attach(
+            'Omeka\Controller\SiteAdmin\Index',
+            'view.layout',
+            [$this, 'handleSiteSettingsHeader']
+        );
+        $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
             'form.add_elements',
             [$this, 'handleSiteSettings']
@@ -163,6 +168,14 @@ class Module extends AbstractModule
 
         $this->updateSiteSettings('blocksdisposition_modules');
         return true;
+    }
+
+    public function handleSiteSettingsHeader(Event $event)
+    {
+        $view = $event->getTarget();
+        $assetUrl = $view->getHelperPluginManager()->get('assetUrl');
+        $view->headLink()->appendStylesheet($assetUrl('css/blocks-disposition.css', 'BlocksDisposition'));
+        $view->headScript()->appendFile($assetUrl('js/blocks-disposition.js', 'BlocksDisposition'));
     }
 
     public function handleSiteSettings(Event $event)
