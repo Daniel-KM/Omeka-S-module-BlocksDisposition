@@ -99,7 +99,7 @@ class Module extends AbstractModule
     }
 
     /**
-     * Enable, disable and reorder modules according to the sie settings.
+     * Enable, disable and reorder modules according to the site settings.
      *
      * @param string $identifier Event identifier
      * @param string $eventName
