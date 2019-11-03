@@ -42,7 +42,6 @@ use Generic\AbstractModule;
 use Zend\EventManager\Event;
 use Zend\EventManager\SharedEventManagerInterface;
 use Zend\Form\Fieldset;
-use Zend\Mvc\Controller\AbstractController;
 
 class Module extends AbstractModule
 {
@@ -98,6 +97,31 @@ class Module extends AbstractModule
         );
     }
 
+    public function handleViewShowBeforeItem(Event $event)
+    {
+        $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.show.after', 'blocksdisposition_item_show');
+    }
+
+    public function handleViewBrowseBeforeItem(Event $event)
+    {
+        $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.browse.after', 'blocksdisposition_item_browse');
+    }
+
+    public function handleViewBrowseBeforeItemSet(Event $event)
+    {
+        $this->rewriteListeners('Omeka\Controller\Site\ItemSet', 'view.browse.after', 'blocksdisposition_item_set_browse');
+    }
+
+    public function handleViewShowBeforeItemSet(Event $event)
+    {
+        $this->rewriteListeners('Omeka\Controller\Site\ItemSet', 'view.show.after', 'blocksdisposition_item_set_show');
+    }
+
+    public function handleViewShowBeforeMedia(Event $event)
+    {
+        $this->rewriteListeners('Omeka\Controller\Site\Media', 'view.show.after', 'blocksdisposition_media_show');
+    }
+
     /**
      * Enable, disable and reorder modules according to the site settings.
      *
@@ -135,41 +159,6 @@ class Module extends AbstractModule
         }
     }
 
-    public function handleViewShowBeforeItem(Event $event)
-    {
-        $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.show.after', 'blocksdisposition_item_show');
-    }
-
-    public function handleViewBrowseBeforeItem(Event $event)
-    {
-        $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.browse.after', 'blocksdisposition_item_browse');
-    }
-
-    public function handleViewBrowseBeforeItemSet(Event $event)
-    {
-        $this->rewriteListeners('Omeka\Controller\Site\ItemSet', 'view.browse.after', 'blocksdisposition_item_set_browse');
-    }
-
-    public function handleViewShowBeforeItemSet(Event $event)
-    {
-        $this->rewriteListeners('Omeka\Controller\Site\ItemSet', 'view.show.after', 'blocksdisposition_item_set_show');
-    }
-
-    public function handleViewShowBeforeMedia(Event $event)
-    {
-        $this->rewriteListeners('Omeka\Controller\Site\Media', 'view.show.after', 'blocksdisposition_media_show');
-    }
-
-    public function handleConfigForm(AbstractController $controller)
-    {
-        if (!parent::handleConfigForm($controller)) {
-            return false;
-        }
-
-        $this->updateSiteSettings('blocksdisposition_modules');
-        return true;
-    }
-
     public function handleSiteSettingsHeader(Event $event)
     {
         $view = $event->getTarget();
@@ -183,8 +172,7 @@ class Module extends AbstractModule
         $services = $this->getServiceLocator();
         $space = strtolower(__NAMESPACE__);
 
-        $settings = $services->get('Omeka\Settings');
-        $modules = $settings->get('blocksdisposition_modules', []);
+        $modulesByView = $this->listModulesByView();
 
         $settingType = 'site_settings';
         $settings = $services->get('Omeka\Settings\Site');
@@ -192,11 +180,11 @@ class Module extends AbstractModule
 
         $translator = $services->get('MvcTranslator');
         $blockTitles = [
-            'blocksdisposition_item_browse' => $translator->translate('For item browse'), // @translate
-            'blocksdisposition_item_show' => $translator->translate('For item show'), // @translate
-            'blocksdisposition_item_set_browse' => $translator->translate('For item set browse'), // @translate
             'blocksdisposition_item_set_show' => $translator->translate('For item set show'), // @translate
+            'blocksdisposition_item_show' => $translator->translate('For item show'), // @translate
             'blocksdisposition_media_show' => $translator->translate('For media show'), // @translate
+            'blocksdisposition_item_set_browse' => $translator->translate('For item set browse'), // @translate
+            'blocksdisposition_item_browse' => $translator->translate('For item browse'), // @translate
         ];
 
         $fieldset = new Fieldset();
@@ -205,9 +193,9 @@ class Module extends AbstractModule
             ->setLabel('Blocks Disposition')
             ->setAttribute('id', $space)
             ->setAttribute('data-block-titles', json_encode($blockTitles))
-            ->setAttribute('data-modules', json_encode($modules));
+            ->setAttribute('data-modules-by-view', json_encode($modulesByView));
 
-        if (empty($modules)) {
+        if (!array_filter($modulesByView)) {
             $fieldset
                 ->setLabel('Blocks Disposition (module config missing)');
         }
@@ -231,7 +219,8 @@ class Module extends AbstractModule
             $value = array_values(array_unique($value));
             $dataToPopulate[$name . '-hide[]'] = json_encode($value);
             $dataToPopulate[$name] = $value;
-            $valueOptions = array_combine($value, $value) + array_combine($modules, $modules);
+            $valueOptions = array_combine($value, $value)
+                + array_combine($modulesByView[substr($name, 18)], $modulesByView[substr($name, 18)]);
 
             $fieldset->add([
                 'name' => $name,
@@ -255,8 +244,8 @@ class Module extends AbstractModule
 
     public function handleSiteSettingsFilters(Event $event)
     {
-        $inputFilter = $event->getParam('inputFilter');
-        $inputFilter->get('blocksdisposition')
+        $event->getParam('inputFilter')
+            ->get('blocksdisposition')
             ->add([
                 'name' => 'blocksdisposition_item_browse',
                 'required' => false,
@@ -279,33 +268,23 @@ class Module extends AbstractModule
             ]);
     }
 
-    /**
-     * Update sites settings according to a main setting.
-     *
-     * @param string $name
-     */
-    protected function updateSiteSettings($name)
+    protected function listModulesByView()
     {
         $services = $this->getServiceLocator();
-        $settings = $services->get('Omeka\Settings');
-        $siteSettings = $services->get('Omeka\Settings\Site');
-        $api = $services->get('Omeka\ApiManager');
+        $activeModules = $services->get('Omeka\ModuleManager')
+            ->getModulesByState(\Omeka\Module\Manager::STATE_ACTIVE);
+        unset($activeModules['BlocksDisposition']);
 
-        $modules = $settings->get('blocksdisposition_modules') ?: [];
+        $activeModules = array_combine(array_keys($activeModules), array_map(function ($v) {
+            return $v->getName();
+        }, $activeModules));
 
-        $sites = $api->search('sites')->getContent();
-        foreach ($sites as $site) {
-            $id = $site->id();
-            $siteSettings->setTargetId($id);
-            $this->initDataToPopulate($siteSettings, 'site_settings', $id);
-            $data = $this->prepareDataToPopulate($siteSettings, 'site_settings');
-            // Don't update empty values: nothing can be removed.
-            $data = array_filter($data);
-            foreach (array_keys($data) as $name) {
-                $moduleBlocks = $siteSettings->get($name) ?: [];
-                $moduleBlocks = array_unique(array_intersect($moduleBlocks, $modules));
-                $siteSettings->set($name, array_values($moduleBlocks));
-            }
+        $modulesByView = $services->get('Config')['blocksdisposition']['views'];
+        foreach ($modulesByView as &$modules) {
+            $modules = array_values(array_unique(array_intersect($modules, array_keys($activeModules))));
         }
+        unset($modules);
+
+        return $modulesByView;
     }
 }

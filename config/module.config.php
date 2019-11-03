@@ -2,16 +2,6 @@
 namespace BlocksDisposition;
 
 return [
-    'view_manager' => [
-        'template_path_stack' => [
-            dirname(__DIR__) . '/view',
-        ],
-    ],
-    'form_elements' => [
-        'factories' => [
-            Form\ConfigForm::class => Service\Form\ConfigFormFactory::class,
-        ],
-    ],
     'translator' => [
         'translation_file_patterns' => [
             [
@@ -32,6 +22,52 @@ return [
             'blocksdisposition_item_set_browse' => [],
             'blocksdisposition_item_set_show' => [],
             'blocksdisposition_media_show' => [],
+        ],
+        // Common modules that trigger "view.show.after" and "view.browse.after".
+        // When the module is not set, here or in its own config, the trigger is not executed.
+        // TODO Autodetection of the modules that trigger these events (in site settings).
+        'views' => [
+            'item_set_show' => [
+                'Annotation',
+                'Comment',
+                'Folksonomy',
+            ],
+            'item_show' => [
+                'AccessResource',
+                'Annotation',
+                'Basket',
+                'Citation',
+                'Coins',
+                'Collecting',
+                'Comment',
+                'Diva',
+                'Folksonomy',
+                'Mapping',
+                'MediaQuality',
+                'Mirador',
+                'Sharing',
+                'UnApi',
+                'UniversalViewer',
+            ],
+            'media_show' => [
+                'AccessResource',
+                'Annotation',
+                'Comment',
+                'Folksonomy',
+                'MediaQuality',
+            ],
+            'item_set_browse' => [
+                'AccessResource',
+                'Mirador',
+                'UniversalViewer',
+            ],
+            'item_browse' => [
+                'AccessResource',
+                'Coins',
+                'Mirador',
+                'UnApi',
+                'UniversalViewer',
+            ],
         ],
     ],
 ];

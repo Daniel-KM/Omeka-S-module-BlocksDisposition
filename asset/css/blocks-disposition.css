@@ -28,6 +28,7 @@
 #blocksdisposition .block-for .block_title {
     margin-top: 10px;
     width: 152px;
+    min-width: 152px;
     text-align: right;
     margin-right: 10px;
 }

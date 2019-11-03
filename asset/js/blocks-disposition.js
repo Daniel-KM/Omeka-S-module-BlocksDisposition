@@ -3,7 +3,7 @@ $(document).ready(function () {
     var blocksdisposition = $('#blocksdisposition');
     var site_settings_blocks = [];
     var blocks_title = blocksdisposition.data('block-titles');
-    var available_modules = blocksdisposition.data('modules');
+    var available_modules_by_view = blocksdisposition.data('modules-by-view');
 
     $.each(blocks_title, function (key, val) {
         site_settings_blocks.push({
@@ -12,16 +12,6 @@ $(document).ready(function () {
             'block_settings': '',
         });
     });
-
-    // Make html block for available modules.
-    var available_modules_html = '<div>' + "\n";
-    $.each(available_modules, function (key, val) {
-        available_modules_html += '<div class="field js-module js-module-' + val + '">' + "\n"
-           + '  <a class="button">' + val + '</a>' + "\n"
-           + '  <div class="js-module-position">0</div>' + "\n"
-           + '</div>' + "\n";
-    })
-    available_modules_html += '</div>';
 
     $.each(site_settings_blocks, function (key, val) {
         var block_settings = [];
@@ -36,6 +26,16 @@ $(document).ready(function () {
             + '  <div class="block_title">' + val.title + '</div>' + "\n"
             + '  <div class="block_buttons"></div>' + "\n"
             + '</div>' + "\n";
+
+        // Make html block for available modules for the view.
+        var available_modules_html = '<div>' + "\n";
+        $.each(available_modules_by_view[val.name.substring(18)], function (key, val) {
+            available_modules_html += '<div class="field js-module js-module-' + val + '">' + "\n"
+               + '  <a class="button">' + val + '</a>' + "\n"
+               + '  <div class="js-module-position">0</div>' + "\n"
+               + '</div>' + "\n";
+        })
+        available_modules_html += '</div>';
 
         blocksdisposition.append(site_settings_blocks_html);
         $('.js-' + val.name + ' .block_buttons').append(available_modules_html);
@@ -104,7 +104,7 @@ $(document).ready(function () {
                 .slice(key, key + 1)
                 .prop('checked', true).prop('value', val).html(val);
         });
-        $.each(available_modules, function (key, val) {
+        $.each(available_modules_by_view[val.name.substring(18)], function (key, val) {
             if (new_block_value.indexOf(val) < 0) {
                 inputs.find('input.module-sort')
                     .slice(key + new_block_value.length, key + 1 + new_block_value.length)
