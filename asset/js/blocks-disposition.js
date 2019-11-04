@@ -14,12 +14,14 @@ $(document).ready(function () {
     });
 
     $.each(site_settings_blocks, function (key, val) {
-        var block_settings = [];
-        if ($('#' + val.name).val().length > 0) {
-            block_settings = $.parseJSON($('#' + val.name).val());
-            // Remove empty values that may exists.
-            block_settings = block_settings.filter(item => item);
+        if ($('#' + val.name).val().length <= 0) {
+            return;
         }
+
+        var block_settings = [];
+        block_settings = $.parseJSON($('#' + val.name).val());
+        // Remove empty values that may exists.
+        block_settings = block_settings.filter(item => item);
 
         site_settings_blocks[key].block_settings = $('#' + val.name).val();
         var site_settings_blocks_html = '<div class="block-for js-' + val.name + '" data-block-name="' + val.name + '">' + "\n"
@@ -34,7 +36,7 @@ $(document).ready(function () {
                + '  <a class="button">' + val + '</a>' + "\n"
                + '  <div class="js-module-position">0</div>' + "\n"
                + '</div>' + "\n";
-        })
+        });
         available_modules_html += '</div>';
 
         blocksdisposition.append(site_settings_blocks_html);
@@ -104,7 +106,7 @@ $(document).ready(function () {
                 .slice(key, key + 1)
                 .prop('checked', true).prop('value', val).html(val);
         });
-        $.each(available_modules_by_view[val.name.substring(18)], function (key, val) {
+        $.each(available_modules_by_view[attr_block_name.substring(18)], function (key, val) {
             if (new_block_value.indexOf(val) < 0) {
                 inputs.find('input.module-sort')
                     .slice(key + new_block_value.length, key + 1 + new_block_value.length)
