@@ -75,6 +75,9 @@ Another point to check is the fact that the namespace of the callable that is
 triggered must be the same than the module name. This is always the case for all
 known public modules.
 
+This fix is integrated upstream in last version of Mapping, Collecting, and some
+other modules, so you only have to check your own modules.
+
 
 Warning
 -------
