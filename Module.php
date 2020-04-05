@@ -164,7 +164,7 @@ class Module extends AbstractModule
         $view = $event->getTarget();
         $assetUrl = $view->getHelperPluginManager()->get('assetUrl');
         $view->headLink()->appendStylesheet($assetUrl('css/blocks-disposition.css', 'BlocksDisposition'));
-        $view->headScript()->appendFile($assetUrl('js/blocks-disposition.js', 'BlocksDisposition'));
+        $view->headScript()->appendFile($assetUrl('js/blocks-disposition.js', 'BlocksDisposition'), 'text/javascript', ['defer' => 'defer']);
     }
 
     public function handleSiteSettings(Event $event)
