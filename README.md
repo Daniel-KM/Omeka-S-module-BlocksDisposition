@@ -79,6 +79,12 @@ known public modules.
 and some other modules, so you only have to check your own modules.
 
 
+TODO
+----
+
+- Manage events "view.layout" so appended blocks can be prepended and vice-versa.
+
+
 Warning
 -------
 
@@ -120,7 +126,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2019 (see [Daniel-KM] on GitHub)
+* Copyright Daniel Berthereau, 2019-2020 (see [Daniel-KM] on GitHub)
 
 
 [Blocks Disposition]: https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition
