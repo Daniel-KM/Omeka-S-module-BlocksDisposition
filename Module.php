@@ -4,7 +4,7 @@
  *
  * Manage automatic display of features of the modules in the resource pages.
  *
- * @copyright Daniel Berthereau, 2019
+ * @copyright Daniel Berthereau, 2019-2020
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -162,6 +162,12 @@ class Module extends AbstractModule
     public function handleSiteSettingsHeader(Event $event)
     {
         $view = $event->getTarget();
+
+        $params = $view->params()->fromRoute();
+        if (empty($params['action']) || $params['action'] !== 'settings') {
+            return;
+        }
+
         $assetUrl = $view->getHelperPluginManager()->get('assetUrl');
         $view->headLink()->appendStylesheet($assetUrl('css/blocks-disposition.css', 'BlocksDisposition'));
         $view->headScript()->appendFile($assetUrl('js/blocks-disposition.js', 'BlocksDisposition'), 'text/javascript', ['defer' => 'defer']);
@@ -170,7 +176,6 @@ class Module extends AbstractModule
     public function handleSiteSettings(Event $event)
     {
         $services = $this->getServiceLocator();
-        $space = strtolower(__NAMESPACE__);
 
         $modulesByView = $this->listModulesByView();
 
@@ -189,9 +194,9 @@ class Module extends AbstractModule
 
         $fieldset = new Fieldset();
         $fieldset
-            ->setName($space)
+            ->setName('blocksdisposition')
             ->setLabel('Blocks Disposition')
-            ->setAttribute('id', $space)
+            ->setAttribute('id', 'blocksdisposition')
             ->setAttribute('data-block-titles', json_encode($blockTitles))
             ->setAttribute('data-modules-by-view', json_encode($modulesByView));
 
@@ -239,7 +244,7 @@ class Module extends AbstractModule
 
         $form = $event->getTarget();
         $form->add($fieldset);
-        $form->get($space)->populateValues($dataToPopulate);
+        $form->get('blocksdisposition')->populateValues($dataToPopulate);
     }
 
     public function handleSiteSettingsFilters(Event $event)
