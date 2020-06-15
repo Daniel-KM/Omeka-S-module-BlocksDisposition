@@ -220,11 +220,11 @@ class Module extends AbstractModule
                 ],
             ]);
 
-            $value = is_array($value) ? $value : explode(',', $value);
-            $value = array_values(array_unique($value));
-            $dataToPopulate[$name . '-hide[]'] = json_encode($value);
-            $dataToPopulate[$name] = $value;
-            $valueOptions = array_combine($value, $value)
+            $values = is_array($value) ? $value : explode(',', $value);
+            $values = array_values(array_unique($values));
+            $dataToPopulate[$name . '-hide[]'] = json_encode($values);
+            $dataToPopulate[$name] = $values;
+            $valueOptions = array_combine($values, $values)
                 + array_combine($modulesByView[substr($name, 18)], $modulesByView[substr($name, 18)]);
 
             $fieldset->add([
@@ -286,7 +286,10 @@ class Module extends AbstractModule
 
         $modulesByView = $services->get('Config')['blocksdisposition']['views'];
         foreach ($modulesByView as &$modules) {
-            $modules = array_values(array_unique(array_intersect($modules, array_keys($activeModules))));
+            $modules = array_unique(array_intersect($modules, array_keys($activeModules)));
+            natcasesort($modules);
+            // Clean array keys because json_encode() doesn't keep order with numeric keys.
+            $modules = array_values($modules);
         }
         unset($modules);
 

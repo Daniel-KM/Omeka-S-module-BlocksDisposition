@@ -20,7 +20,7 @@ $(document).ready(function () {
 
         var block_settings = [];
         block_settings = $.parseJSON($('#' + val.name).val());
-        // Remove empty values that may exists.
+        // Remove empty values that may exist.
         block_settings = block_settings.filter(item => item);
 
         site_settings_blocks[key].block_settings = $('#' + val.name).val();
@@ -31,12 +31,15 @@ $(document).ready(function () {
 
         // Make html block for available modules for the view.
         var available_modules_html = '<div>' + "\n";
-        $.each(available_modules_by_view[val.name.substring(18)], function (key, val) {
+        var appendFieldButton = function(key, val) {
             available_modules_html += '<div class="field js-module js-module-' + val + '">' + "\n"
-               + '  <a class="button">' + val + '</a>' + "\n"
-               + '  <div class="js-module-position">0</div>' + "\n"
-               + '</div>' + "\n";
-        });
+                + '  <a class="button">' + val + '</a>' + "\n"
+                + '  <div class="js-module-position">0</div>' + "\n"
+                + '</div>' + "\n";
+        };
+        // Display ordered used modules first.
+        $.each(block_settings, appendFieldButton);
+        $.each(available_modules_by_view[val.name.substring(18)].filter(function(val) {return !block_settings.includes(val)}), appendFieldButton);
         available_modules_html += '</div>';
 
         blocksdisposition.append(site_settings_blocks_html);
