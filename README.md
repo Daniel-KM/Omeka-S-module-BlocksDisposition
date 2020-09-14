@@ -27,17 +27,17 @@ See general end user documentation for [Installing a module].
 Usage
 -----
 
-First, set the modules that will be available for config in the module config
-form. This module is not yet enable to determine all modules that are used in
-the public resources pages.
-
-Then, the options can be set differently for each site in the site settings,
-under  `Blocks Disposition`. Simply enable and set the order of each feature for
-each type of page.
+The options can be set differently for each site in the site settings, under
+`Blocks Disposition`. Simply enable and set the order of each feature for each
+type of page.
 
 The process uses the trigger `view.show.before` to reorder the modules that use
 the trigger `view.show.after`, so they must not be removed from the theme. It is
 the same for the triggers `view.browse.before` and `view.browse.after`.
+
+Some modules may not be listed: add them in the module [config/module.config.php].
+This module is not yet enable to determine all modules that are used in the
+public resources pages
 
 
 Compatibility warning
@@ -51,13 +51,13 @@ example, for module [Mapping], the method `attachListeners()` in the main file
 of the module `modules/Mapping/Module.php` must be updated:
 ```diff
 101      $sharedEventManager->attach(
-102         'Omeka\Controller\Site\Item',
-103            'view.show.after',
+102          'Omeka\Controller\Site\Item',
+103          'view.show.after',
 104--            function (Event $event) {
 105--                echo $event->getTarget()->partial('mapping/index/show');
 106--            }
    ++            [$this, 'handleViewShowAfterItem']
-107        );
+107      );
 
 Add:
 
@@ -82,7 +82,8 @@ and some other modules, so you only have to check your own modules.
 TODO
 ----
 
-- Manage events "view.layout" so appended blocks can be prepended and vice-versa.
+- [ ] Determine the list of modules automatically via the events they listen.
+- [ ] Manage events "view.layout" so appended blocks can be prepended and vice-versa.
 
 
 Warning
@@ -139,6 +140,7 @@ Copyright
 [Comment]: https://github.com/Daniel-KM/Omeka-S-module-Comment
 [Collecting]: https://github.com/omeka-s-modules/Collecting
 [Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
+[config/module.config.php]: https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition/blob/master/config/module.config.php#L26-L96
 [module issues]: https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
