@@ -101,7 +101,7 @@ your archives regularly so you can roll back if needed.
 Troubleshooting
 ---------------
 
-See online issues on the [module issues] page on GitHub.
+See online issues on the [module issues] page on GitLab.
 
 
 License
@@ -130,24 +130,24 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2019-2020 (see [Daniel-KM] on GitHub)
+* Copyright Daniel Berthereau, 2019-2020 (see [Daniel-KM] on GitLab)
 
 
-[Blocks Disposition]: https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition
+[Blocks Disposition]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition
 [Omeka S]: https://omeka.org/s
-[Universal Viewer]: https://github.com/Daniel-KM/Omeka-S-module-Mirador
-[Mirador]: https://github.com/Daniel-KM/Omeka-S-module-UniversalViewer
-[Citation]: https://github.com/Daniel-KM/Omeka-S-module-Citation
+[Universal Viewer]: https://gitlab.com/Daniel-KM/Omeka-S-module-Mirador
+[Mirador]: https://gitlab.com/Daniel-KM/Omeka-S-module-UniversalViewer
+[Citation]: https://gitlab.com/Daniel-KM/Omeka-S-module-Citation
 [Mapping]: https://github.com/omeka-s-modules/Mapping
-[Folksonomy]: https://github.com/Daniel-KM/Omeka-S-module-Folksonomy
-[Comment]: https://github.com/Daniel-KM/Omeka-S-module-Comment
+[Folksonomy]: https://gitlab.com/Daniel-KM/Omeka-S-module-Folksonomy
+[Comment]: https://gitlab.com/Daniel-KM/Omeka-S-module-Comment
 [Collecting]: https://github.com/omeka-s-modules/Collecting
 [Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
-[config/module.config.php]: https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition/blob/master/config/module.config.php#L26-L96
-[module issues]: https://github.com/Daniel-KM/Omeka-S-module-BlocksDisposition/issues
+[config/module.config.php]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition/blob/master/config/module.config.php#L26-L96
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
 [OSI]: http://opensource.org
 [GitLab]: https://gitlab.com/Daniel-KM
-[Daniel-KM]: https://github.com/Daniel-KM "Daniel Berthereau"
+[Daniel-KM]: https://gitlab.com/Daniel-KM "Daniel Berthereau"
