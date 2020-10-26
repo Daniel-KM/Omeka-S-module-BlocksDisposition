@@ -39,9 +39,9 @@ if (!class_exists(\Generic\AbstractModule::class)) {
 }
 
 use Generic\AbstractModule;
-use Zend\EventManager\Event;
-use Zend\EventManager\SharedEventManagerInterface;
-use Zend\Form\Fieldset;
+use Laminas\EventManager\Event;
+use Laminas\EventManager\SharedEventManagerInterface;
+use Laminas\Form\Fieldset;
 
 class Module extends AbstractModule
 {
@@ -213,7 +213,7 @@ class Module extends AbstractModule
         foreach ($data as $name => $value) {
             $fieldset->add([
                 'name' => $name . '-hide[]',
-                'type' => \Zend\Form\Element\Hidden::class,
+                'type' => \Laminas\Form\Element\Hidden::class,
                 'attributes' => [
                     'id' => $name,
                     'value' => '',
@@ -229,7 +229,7 @@ class Module extends AbstractModule
 
             $fieldset->add([
                 'name' => $name,
-                'type' => \Zend\Form\Element\MultiCheckbox::class,
+                'type' => \Laminas\Form\Element\MultiCheckbox::class,
                 'options' => [
                     'label' => $blockTitles[$name],
                     // Set initial order, even if js does it.
