@@ -164,7 +164,7 @@ class Module extends AbstractModule
         $view = $event->getTarget();
 
         $params = $view->params()->fromRoute();
-        if (empty($params['action']) || $params['action'] !== 'settings') {
+        if (empty($params['action']) || $params['action'] !== 'edit') {
             return;
         }
 
