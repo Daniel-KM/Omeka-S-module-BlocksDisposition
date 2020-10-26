@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Blocks Disposition
  *
@@ -47,7 +47,7 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
-    public function attachListeners(SharedEventManagerInterface $sharedEventManager)
+    public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
         $sharedEventManager->attach(
             'Omeka\Controller\Site\Item',
@@ -97,27 +97,27 @@ class Module extends AbstractModule
         );
     }
 
-    public function handleViewShowBeforeItem(Event $event)
+    public function handleViewShowBeforeItem(Event $event): void
     {
         $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.show.after', 'blocksdisposition_item_show');
     }
 
-    public function handleViewBrowseBeforeItem(Event $event)
+    public function handleViewBrowseBeforeItem(Event $event): void
     {
         $this->rewriteListeners('Omeka\Controller\Site\Item', 'view.browse.after', 'blocksdisposition_item_browse');
     }
 
-    public function handleViewBrowseBeforeItemSet(Event $event)
+    public function handleViewBrowseBeforeItemSet(Event $event): void
     {
         $this->rewriteListeners('Omeka\Controller\Site\ItemSet', 'view.browse.after', 'blocksdisposition_item_set_browse');
     }
 
-    public function handleViewShowBeforeItemSet(Event $event)
+    public function handleViewShowBeforeItemSet(Event $event): void
     {
         $this->rewriteListeners('Omeka\Controller\Site\ItemSet', 'view.show.after', 'blocksdisposition_item_set_show');
     }
 
-    public function handleViewShowBeforeMedia(Event $event)
+    public function handleViewShowBeforeMedia(Event $event): void
     {
         $this->rewriteListeners('Omeka\Controller\Site\Media', 'view.show.after', 'blocksdisposition_media_show');
     }
@@ -129,7 +129,7 @@ class Module extends AbstractModule
      * @param string $eventName
      * @param string $siteSettingName
      */
-    protected function rewriteListeners($identifier, $eventName, $siteSettingName)
+    protected function rewriteListeners($identifier, $eventName, $siteSettingName): void
     {
         $services = $this->getServiceLocator();
         $sharedEventManager = $services->get('SharedEventManager');
@@ -159,7 +159,7 @@ class Module extends AbstractModule
         }
     }
 
-    public function handleSiteSettingsHeader(Event $event)
+    public function handleSiteSettingsHeader(Event $event): void
     {
         $view = $event->getTarget();
 
@@ -173,7 +173,7 @@ class Module extends AbstractModule
         $view->headScript()->appendFile($assetUrl('js/blocks-disposition.js', 'BlocksDisposition'), 'text/javascript', ['defer' => 'defer']);
     }
 
-    public function handleSiteSettings(Event $event)
+    public function handleSiteSettings(Event $event): void
     {
         $services = $this->getServiceLocator();
 
@@ -247,7 +247,7 @@ class Module extends AbstractModule
         $form->get('blocksdisposition')->populateValues($dataToPopulate);
     }
 
-    public function handleSiteSettingsFilters(Event $event)
+    public function handleSiteSettingsFilters(Event $event): void
     {
         $event->getParam('inputFilter')
             ->get('blocksdisposition')
