@@ -28,7 +28,7 @@ return [
         // TODO Autodetection of the modules that trigger these events (in site settings).
         'views' => [
             'item_set_show' => [
-                'Annotation',
+                'Annotate',
                 'Basket',
                 'BulkExport',
                 'Comment',
@@ -40,7 +40,7 @@ return [
             ],
             'item_show' => [
                 'AccessResource',
-                'Annotation',
+                'Annotate',
                 'Basket',
                 'Bibliography',
                 'BulkExport',
@@ -64,7 +64,7 @@ return [
             ],
             'media_show' => [
                 'AccessResource',
-                'Annotation',
+                'Annotate',
                 'Basket',
                 'BulkExport',
                 'Comment',
