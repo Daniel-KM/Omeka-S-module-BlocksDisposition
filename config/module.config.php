@@ -37,6 +37,7 @@ return [
                 'Folksonomy',
                 'MetadataBrowse',
                 'Selection',
+                'Statistics',
             ],
             'item_show' => [
                 'AccessResource',
@@ -59,6 +60,7 @@ return [
                 'Mirador',
                 'Selection',
                 'Sharing',
+                'Statistics',
                 'UnApi',
                 'UniversalViewer',
             ],
@@ -74,6 +76,7 @@ return [
                 'MediaQuality',
                 'MetadataBrowse',
                 'Selection',
+                'Statistics',
             ],
             'item_set_browse' => [
                 'AccessResource',
