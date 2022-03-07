@@ -4,7 +4,7 @@
  *
  * Manage automatic display of features of the modules in the resource pages.
  *
- * @copyright Daniel Berthereau, 2019-2020
+ * @copyright Daniel Berthereau, 2019-2022
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  *
  * This software is governed by the CeCILL license under French law and abiding
