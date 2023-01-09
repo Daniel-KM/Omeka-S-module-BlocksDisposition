@@ -1,9 +1,21 @@
 $(document).ready(function () {
 
+    // In v4, fieldsets are replaced by element group.
     var blocksdisposition = $('#blocksdisposition');
+    const isV4 = !blocksdisposition.length;
     var site_settings_blocks = [];
-    var blocks_title = blocksdisposition.data('block-titles');
-    var available_modules_by_view = blocksdisposition.data('modules-by-view');
+    var blocks_title = [];
+    var available_modules_by_view = [];
+    if (isV4) {
+        $('fieldset label[for=blocksdisposition_item_browse]').closest('fieldset').prop('id', 'blocksdisposition');
+        blocksdisposition = $('#blocksdisposition');
+        const blocksDispositionData = $('input[name="blocksdisposition_item_browse-hide[]"]');
+        blocks_title = blocksDispositionData.data('block-titles');
+        available_modules_by_view = blocksDispositionData.data('modules-by-view');
+    } else {
+        blocks_title = blocksdisposition.data('block-titles');
+        available_modules_by_view = blocksdisposition.data('modules-by-view');
+    }
 
     $.each(blocks_title, function (key, val) {
         site_settings_blocks.push({
@@ -14,16 +26,21 @@ $(document).ready(function () {
     });
 
     $.each(site_settings_blocks, function (key, val) {
-        if ($('#' + val.name).val().length <= 0) {
+        const input = $('#' + val.name);
+        var inputVal = input.val();
+        if (inputVal === '' && isV4) {
+            inputVal = '[]';
+        }
+        if (inputVal.length <= 0) {
             return;
         }
 
         var block_settings = [];
-        block_settings = $.parseJSON($('#' + val.name).val());
+        block_settings = $.parseJSON(inputVal);
         // Remove empty values that may exist.
         block_settings = block_settings.filter(item => item);
 
-        site_settings_blocks[key].block_settings = $('#' + val.name).val();
+        site_settings_blocks[key].block_settings = inputVal;
         var site_settings_blocks_html = '<div class="block-for js-' + val.name + '" data-block-name="' + val.name + '">' + "\n"
             + '  <div class="block_title">' + val.title + '</div>' + "\n"
             + '  <div class="block_buttons"></div>' + "\n"
@@ -31,15 +48,19 @@ $(document).ready(function () {
 
         // Make html block for available modules for the view.
         var available_modules_html = '<div>' + "\n";
-        var appendFieldButton = function(key, val) {
-            available_modules_html += '<div class="field js-module js-module-' + val + '">' + "\n"
-                + '  <a class="button">' + val + '</a>' + "\n"
+        var appendFieldButton = function(key, value) {
+            available_modules_html += '<div class="field js-module js-module-' + value + '">' + "\n"
+                + '  <a class="button">' + value + '</a>' + "\n"
                 + '  <div class="js-module-position">0</div>' + "\n"
                 + '</div>' + "\n";
         };
         // Display ordered used modules first.
         $.each(block_settings, appendFieldButton);
-        $.each(available_modules_by_view[val.name.substring(18)].filter(function(val) {return !block_settings.includes(val)}), appendFieldButton);
+        $.each(available_modules_by_view[val.name.substring(18)].filter(
+            function(mod) {
+                return !block_settings.includes(mod);
+            }
+        ), appendFieldButton);
         available_modules_html += '</div>';
 
         blocksdisposition.append(site_settings_blocks_html);
@@ -100,7 +121,7 @@ $(document).ready(function () {
         $('.js-' + attr_block_name).attr('data-count-selected', count_selected);
 
         // Save the data via the sorted hidden checkboxes: simply set new names.
-        var inputs = blocksdisposition.find('input[name="blocksdisposition[' + attr_block_name + '][]"]').closest('.field');
+        var inputs = blocksdisposition.find('input[name="' + (isV4 ? attr_block_name + '[]' : 'blocksdisposition[' + attr_block_name + '][]') + '"]').closest('.field');
         // Set all values to false to avoid some checks.
         inputs.find('input.module-sort')
             .prop('checked', false);
