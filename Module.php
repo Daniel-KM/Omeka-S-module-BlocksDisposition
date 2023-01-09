@@ -4,7 +4,7 @@
  *
  * Manage automatic display of features of the modules in the resource pages.
  *
- * @copyright Daniel Berthereau, 2019-2022
+ * @copyright Daniel Berthereau, 2019-2023
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -249,8 +249,10 @@ class Module extends AbstractModule
 
     public function handleSiteSettingsFilters(Event $event): void
     {
-        $event->getParam('inputFilter')
-            ->get('blocksdisposition')
+        $inputFilter = version_compare(\Omeka\Module::VERSION, '4', '<')
+            ? $event->getParam('inputFilter')->get('blocksdisposition')
+            : $event->getParam('inputFilter');
+        $inputFilter
             ->add([
                 'name' => 'blocksdisposition_item_browse',
                 'required' => false,
