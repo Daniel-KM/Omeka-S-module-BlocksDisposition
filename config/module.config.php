@@ -81,6 +81,7 @@ return [
             'item_set_browse' => [
                 'AccessResource',
                 'BulkExport',
+                'Feed',
                 'MetadataBrowse',
                 'Mirador',
                 'SearchHistory',
@@ -91,6 +92,7 @@ return [
                 'BulkExport',
                 'Coins',
                 'Contribute',
+                'Feed',
                 'Mirador',
                 'SearchHistory',
                 'UnApi',
