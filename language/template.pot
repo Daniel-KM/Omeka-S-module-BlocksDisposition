@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2019-07-29 00:00+0200\n"
+"POT-Creation-Date: 2024-02-05 00:00+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,53 +17,27 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: Module.php:182
-msgid "For item browse"
+#: data/scripts/upgrade.php:34 Module.php:68
+#, php-format
+msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr ""
 
-#: Module.php:183
-msgid "For item show"
-msgstr ""
-
-#: Module.php:184
-msgid "For item set browse"
-msgstr ""
-
-#: Module.php:185
+#: Module.php:213
 msgid "For item set show"
 msgstr ""
 
-#: Module.php:186
+#: Module.php:214
+msgid "For item show"
+msgstr ""
+
+#: Module.php:215
 msgid "For media show"
 msgstr ""
 
-#: src/Generic/AbstractModule.php:474
-#, php-format
-msgid "This module requires the module \"%s\"."
+#: Module.php:216
+msgid "For item set browse"
 msgstr ""
 
-#: src/Generic/AbstractModule.php:494
-#, php-format
-msgid "This module requires modules \"%s\"."
-msgstr ""
-
-#: src/Generic/AbstractModule.php:562
-#, php-format
-msgid ""
-"The module \"%s\" was automatically deactivated because the dependencies are "
-"unavailable."
-msgstr ""
-
-#: src/Form/ConfigForm.php:17
-msgid "Modules used in resource views"
-msgstr ""
-
-#: src/Form/ConfigForm.php:18
-msgid ""
-"List all modules that use the trigger \"view.show.after\" and that may be "
-"displayed and ordered."
-msgstr ""
-
-#: src/Form/ConfigForm.php:27
-msgid "Select modules…"
+#: Module.php:217
+msgid "For item browse"
 msgstr ""
