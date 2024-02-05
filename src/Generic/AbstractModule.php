@@ -44,7 +44,7 @@ use Omeka\Stdlib\Message;
  * The logic is "config over code": so all settings have just to be set in the
  * main `config/module.config.php` file, inside a key with the lowercase module
  * name,  with sub-keys `config`, `settings`, `site_settings`, `user_settings`
- * and `block_settings`. All the forms have just to be standard Zend form.
+ * and `block_settings`. All the forms have just to be standard Laminas form.
  * Eventual install and uninstall sql can be set in `data/install/` and upgrade
  * code in `data/scripts`.
  *
@@ -55,19 +55,6 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
     public function getConfig()
     {
         return include $this->modulePath() . '/config/module.config.php';
-    }
-
-    public function onBootstrap(MvcEvent $event): void
-    {
-        parent::onBootstrap($event);
-
-        // Check last version of modules.
-        $sharedEventManager = $this->getServiceLocator()->get('SharedEventManager');
-        $sharedEventManager->attach(
-            'Omeka\Controller\Admin\Module',
-            'view.browse.after',
-            [$this, 'checkAddonVersions']
-        );
     }
 
     public function install(ServiceLocatorInterface $services): void
@@ -125,11 +112,12 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         $this->preUninstall();
         $this->execSqlFromFile($this->modulePath() . '/data/install/uninstall.sql');
         $this
-            ->manageConfig('uninstall')
-            ->manageMainSettings('uninstall')
-            ->manageSiteSettings('uninstall')
             // Don't uninstall user settings, they don't belong to admin.
             // ->manageUserSettings('uninstall')
+            ->manageSiteSettings('uninstall')
+            ->manageMainSettings('uninstall')
+            ->manageConfig('uninstall')
+            // ->uninstallAllResources()
             ->postUninstall();
     }
 
@@ -186,24 +174,20 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
         return $this;
     }
 
-    public function checkAddonVersions(Event $event): void
+    /**
+     * @return self
+     */
+    public function uninstallAllResources(): AbstractModule
     {
-        global $globalCheckAddonVersions;
-
-        if ($globalCheckAddonVersions) {
-            return;
+        $installResources = $this->getInstallResources();
+        if (!$installResources
+            || !method_exists($installResources, 'deleteAllResources')
+        ) {
+            // Nothing to install.
+            return $this;
         }
-        $globalCheckAddonVersions = true;
-
-        $view = $event->getTarget();
-        $hasGenericAsset = basename(dirname(__DIR__)) === 'modules' || file_exists(dirname(__DIR__, 3) . '/Generic/asset/js/check-versions.js');
-        $asset = $hasGenericAsset
-            ? $view->assetUrl('../../Generic/asset/js/check-versions.js', static::NAMESPACE)
-            // Use a cdn to avoid issues with different versions in modules.
-            // Of course, it's simpler to have an up-to-date Generic module.
-            : 'https://cdn.jsdelivr.net/gh/Daniel-KM/Omeka-S-module-Generic@3.3.35/asset/js/check-versions.js';
-        $view->headScript()
-            ->appendFile($asset, 'text/javascript', ['defer' => 'defer']);
+        $installResources->deleteAllResources(static::NAMESPACE);
+        return $this;
     }
 
     public function getConfigForm(PhpRenderer $renderer)
@@ -307,6 +291,12 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
     protected function postInstall(): void
     {
+        $services = $this->getServiceLocator();
+        $filepath = $this->modulePath() . '/data/scripts/install.php';
+        if (file_exists($filepath) && filesize($filepath) && is_readable($filepath)) {
+            $this->setServiceLocator($services);
+            require_once $filepath;
+        }
     }
 
     protected function preUninstall(): void
@@ -315,6 +305,12 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
 
     protected function postUninstall(): void
     {
+        $services = $this->getServiceLocator();
+        $filepath = $this->modulePath() . '/data/scripts/uninstall.php';
+        if (file_exists($filepath) && filesize($filepath) && is_readable($filepath)) {
+            $this->setServiceLocator($services);
+            require_once $filepath;
+        }
     }
 
     /**
@@ -361,7 +357,7 @@ abstract class AbstractModule extends \Omeka\Module\AbstractModule
             // No check: if a table cannot be removed, an exception will be
             // thrown later.
             foreach ($dropTables as $table) {
-                $connection->executeStatement("DROP TABLE `$table`;");
+                $connection->executeStatement("SET FOREIGN_KEY_CHECKS=0; DROP TABLE `$table`;");
             }
 
             $translator = $services->get('MvcTranslator');
