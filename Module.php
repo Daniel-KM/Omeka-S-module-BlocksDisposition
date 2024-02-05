@@ -32,20 +32,45 @@
  */
 namespace BlocksDisposition;
 
-if (!class_exists(\Generic\AbstractModule::class)) {
-    require file_exists(dirname(__DIR__) . '/Generic/AbstractModule.php')
-        ? dirname(__DIR__) . '/Generic/AbstractModule.php'
-        : __DIR__ . '/src/Generic/AbstractModule.php';
+if (!class_exists(\Common\TraitModule::class)) {
+    require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
-use Generic\AbstractModule;
+use Common\TraitModule;
 use Laminas\EventManager\Event;
 use Laminas\EventManager\SharedEventManagerInterface;
 use Laminas\Form\Fieldset;
+use Omeka\Module\AbstractModule;
 
+/**
+ * Blocks Disposition
+ *
+ * @copyright Daniel Berthereau, 2019-2024
+ * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
+ */
 class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
+
+    use TraitModule;
+
+    protected $dependencies = [
+        'Common',
+    ];
+
+    protected function preInstall(): void
+    {
+        $services = $this->getServiceLocator();
+        $translate = $services->get('ControllerPluginManager')->get('translate');
+
+        if (!method_exists($this, 'checkModuleActiveVersion') || !$this->checkModuleActiveVersion('Common', '3.4.51')) {
+            $message = new \Omeka\Stdlib\Message(
+                $translate('The module %1$s should be upgraded to version %2$s or later.'), // @translate
+                'Common', '3.4.51'
+            );
+            throw new \Omeka\Module\Exception\ModuleCannotInstallException((string) $message);
+        }
+    }
 
     public function attachListeners(SharedEventManagerInterface $sharedEventManager): void
     {
@@ -205,18 +230,13 @@ class Module extends AbstractModule
                 ->setLabel('Blocks Disposition (module config missing)');
         }
 
-        $isV4 = version_compare(\Omeka\Module::VERSION, '4', '>=');
-
         // Hidden doesn't support multiple ordered values in Zend, so a
         // multicheckbox is added. The hidden values are not saved, because Zend
         // wraps the name with the fieldset name.
         // TODO Finalize the js (sort checkbox + enable/disable) so the hidden inputs won't be needed anymore.
-        $dataToPopulate = [];
         foreach ($data as $name => $value) {
             $values = is_array($value) ? $value : explode(',', $value);
             $values = array_values(array_unique($values));
-            $dataToPopulate[$name . '-hide[]'] = json_encode($values);
-            $dataToPopulate[$name] = $values;
             $valueOptions = array_combine($values, $values)
                 + array_combine($modulesByView[substr($name, 18)], $modulesByView[substr($name, 18)]);
 
@@ -229,7 +249,7 @@ class Module extends AbstractModule
                     ],
                     'attributes' => [
                         'id' => $name,
-                        'value' => $isV4 ? json_encode($values, 320) : '',
+                        'value' => json_encode($values, 320),
                     ],
                 ]);
 
@@ -260,27 +280,20 @@ class Module extends AbstractModule
         }
 
         $form = $event->getTarget();
-        if (!$isV4) {
-            $form->add($fieldset);
-            $form->get('blocksdisposition')->populateValues($dataToPopulate);
-        } else {
-            $fieldsetElementGroups = ['blocksdisposition' => 'Blocks disposition'];
-            $form->setOption('element_groups', array_merge($form->getOption('element_groups') ?: [], $fieldsetElementGroups));
-            foreach ($fieldset->getFieldsets() as $subFieldset) {
-                $form->add($subFieldset);
-            }
-            foreach ($fieldset->getElements() as $element) {
-                $form->add($element);
-            }
-            $form->populateValues($data);
+        $fieldsetElementGroups = ['blocksdisposition' => 'Blocks disposition'];
+        $form->setOption('element_groups', array_merge($form->getOption('element_groups') ?: [], $fieldsetElementGroups));
+        foreach ($fieldset->getFieldsets() as $subFieldset) {
+            $form->add($subFieldset);
         }
+        foreach ($fieldset->getElements() as $element) {
+            $form->add($element);
+        }
+        $form->populateValues($data);
     }
 
     public function handleSiteSettingsFilters(Event $event): void
     {
-        $inputFilter = version_compare(\Omeka\Module::VERSION, '4', '<')
-            ? $event->getParam('inputFilter')->get('blocksdisposition')
-            : $event->getParam('inputFilter');
+        $inputFilter = $event->getParam('inputFilter');
         $inputFilter
             ->add([
                 'name' => 'blocksdisposition_item_browse',
