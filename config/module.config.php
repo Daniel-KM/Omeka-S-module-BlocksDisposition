@@ -28,6 +28,7 @@ return [
         // TODO Autodetection of the modules that trigger these events (in site settings).
         'views' => [
             'item_set_show' => [
+                'Access',
                 'AccessResource',
                 'Annotate',
                 'Basket',
@@ -41,6 +42,7 @@ return [
                 'Statistics',
             ],
             'item_show' => [
+                'Access',
                 'AccessResource',
                 'Annotate',
                 'Basket',
@@ -66,6 +68,7 @@ return [
                 'UniversalViewer',
             ],
             'media_show' => [
+                'Access',
                 'AccessResource',
                 'Annotate',
                 'Basket',
@@ -80,6 +83,7 @@ return [
                 'Statistics',
             ],
             'item_set_browse' => [
+                'Access',
                 'AccessResource',
                 'BulkExport',
                 'Feed',
@@ -89,6 +93,7 @@ return [
                 'UniversalViewer',
             ],
             'item_browse' => [
+                'Access',
                 'AccessResource',
                 'BulkExport',
                 'Coins',
@@ -100,6 +105,7 @@ return [
                 'UniversalViewer',
             ],
             'media_browse' => [
+                'Access',
                 'BulkExport',
                 'SearchHistory',
             ],
