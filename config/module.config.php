@@ -28,6 +28,7 @@ return [
         // TODO Autodetection of the modules that trigger these events (in site settings).
         'views' => [
             'item_set_show' => [
+                'AccessResource',
                 'Annotate',
                 'Basket',
                 'BulkExport',
