@@ -25,7 +25,7 @@ Installation
 Uncompress files and rename module folder `BlocksDisposition`. Then install it
 like any other Omeka module and follow the config instructions.
 
-See general end user documentation for [Installing a module].
+See general end user documentation for [installing a module].
 
 
 Usage
@@ -131,7 +131,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2019-2024 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2019-2025 (see [Daniel-KM] on GitLab)
 
 
 [Blocks Disposition]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition
@@ -143,7 +143,7 @@ Copyright
 [Folksonomy]: https://gitlab.com/Daniel-KM/Omeka-S-module-Folksonomy
 [Comment]: https://gitlab.com/Daniel-KM/Omeka-S-module-Comment
 [Collecting]: https://github.com/omeka-s-modules/Collecting
-[Installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
+[installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [config/module.config.php]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition/blob/master/config/module.config.php#L26-L96
 [module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition/-/issues
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
