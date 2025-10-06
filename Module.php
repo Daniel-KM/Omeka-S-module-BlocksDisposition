@@ -4,7 +4,7 @@
  *
  * Manage automatic display of features of the modules in the resource pages.
  *
- * @copyright Daniel Berthereau, 2019-2023
+ * @copyright Daniel Berthereau, 2019-2025
  * @license http://www.cecill.info/licences/Licence_CeCILL_V2.1-en.txt
  *
  * This software is governed by the CeCILL license under French law and abiding
@@ -32,7 +32,7 @@
  */
 namespace BlocksDisposition;
 
-if (!class_exists(\Common\TraitModule::class)) {
+if (!class_exists('Common\TraitModule', false)) {
     require_once dirname(__DIR__) . '/Common/TraitModule.php';
 }
 
