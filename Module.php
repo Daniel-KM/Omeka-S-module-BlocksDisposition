@@ -194,8 +194,10 @@ class Module extends AbstractModule
         }
 
         $assetUrl = $view->getHelperPluginManager()->get('assetUrl');
-        $view->headLink()->appendStylesheet($assetUrl('css/blocks-disposition.css', 'BlocksDisposition'));
-        $view->headScript()->appendFile($assetUrl('js/blocks-disposition.js', 'BlocksDisposition'), 'text/javascript', ['defer' => 'defer']);
+        $view->headLink()
+            ->appendStylesheet($assetUrl('css/blocks-disposition.css', 'BlocksDisposition'));
+        $view->headScript()
+            ->appendFile($assetUrl('js/blocks-disposition.js', 'BlocksDisposition'), 'text/javascript', ['defer' => 'defer']);
     }
 
     public function handleSiteSettings(Event $event): void
@@ -217,11 +219,14 @@ class Module extends AbstractModule
             'blocksdisposition_item_browse' => $translator->translate('For item browse'), // @translate
         ];
 
+        $isOldOmeka = version_compare(\Omeka\Module::VERSION, '4.0', '<');
+
         $fieldset = new Fieldset();
         $fieldset
             ->setName('blocksdisposition')
             ->setLabel('Blocks Disposition')
             ->setAttribute('id', 'blocksdisposition')
+            ->setAttribute('omeka-version', $isOldOmeka ? '3' : '4')
             ->setAttribute('data-block-titles', json_encode($blockTitles))
             ->setAttribute('data-modules-by-view', json_encode($modulesByView));
 

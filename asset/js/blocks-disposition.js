@@ -2,19 +2,19 @@ $(document).ready(function () {
 
     // In v4, fieldsets are replaced by element group.
     var blocksdisposition = $('#blocksdisposition');
-    const isV4 = !blocksdisposition.length;
+    const isV3 = blocksdisposition.length && blocksdisposition.attr('omeka-version') === '3';
     var site_settings_blocks = [];
     var blocks_title = [];
     var available_modules_by_view = [];
-    if (isV4) {
+    if (isV3) {
+        blocks_title = blocksdisposition.data('block-titles');
+        available_modules_by_view = blocksdisposition.data('modules-by-view');
+    } else {
         $('fieldset label[for=blocksdisposition_item_browse]').closest('fieldset').prop('id', 'blocksdisposition');
         blocksdisposition = $('#blocksdisposition');
         const blocksDispositionData = $('input[name="blocksdisposition_item_browse-hide[]"]');
         blocks_title = blocksDispositionData.data('block-titles');
         available_modules_by_view = blocksDispositionData.data('modules-by-view');
-    } else {
-        blocks_title = blocksdisposition.data('block-titles');
-        available_modules_by_view = blocksdisposition.data('modules-by-view');
     }
 
     $.each(blocks_title, function (key, val) {
@@ -28,7 +28,7 @@ $(document).ready(function () {
     $.each(site_settings_blocks, function (key, val) {
         const input = $('#' + val.name);
         var inputVal = input.val();
-        if (inputVal === '' && isV4) {
+        if (inputVal === '' && !isV3) {
             inputVal = '[]';
         }
         if (inputVal.length <= 0) {
@@ -121,7 +121,7 @@ $(document).ready(function () {
         $('.js-' + attr_block_name).attr('data-count-selected', count_selected);
 
         // Save the data via the sorted hidden checkboxes: simply set new names.
-        var inputs = blocksdisposition.find('input[name="' + (isV4 ? attr_block_name + '[]' : 'blocksdisposition[' + attr_block_name + '][]') + '"]').closest('.field');
+        var inputs = blocksdisposition.find('input[name="' + (isV3 ? 'blocksdisposition[' + attr_block_name + '][]' : attr_block_name + '[]') + '"]').closest('.field');
         // Set all values to false to avoid some checks.
         inputs.find('input.module-sort')
             .prop('checked', false);
