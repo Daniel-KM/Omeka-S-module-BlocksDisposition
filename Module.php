@@ -206,11 +206,18 @@ class Module extends AbstractModule
 
         $modulesByView = $this->listModulesByView();
 
-        $settingType = 'site_settings';
+        /**
+         * @var \Omeka\Settings\SiteSettings $settings
+         */
         $settings = $services->get('Omeka\Settings\Site');
-        $data = $this->prepareDataToPopulate($settings, $settingType);
-
         $translator = $services->get('MvcTranslator');
+
+        $site = $services->get('ControllerPluginManager')->get('currentSite');
+        $targetId = $site()->id();
+
+        $settingType = 'site_settings';
+        $data = $this->prepareDataToPopulate($settings, $settingType, $targetId);
+
         $blockTitles = [
             'blocksdisposition_item_set_show' => $translator->translate('For item set show'), // @translate
             'blocksdisposition_item_show' => $translator->translate('For item show'), // @translate
@@ -250,7 +257,7 @@ class Module extends AbstractModule
                     'name' => $name . '-hide[]',
                     'type' => \Laminas\Form\Element\Hidden::class,
                     'options' => [
-                        'element_group' => 'blocksdisposition',
+                        'element_group' => 'themes_old',
                     ],
                     'attributes' => [
                         'id' => $name,
@@ -263,7 +270,7 @@ class Module extends AbstractModule
                     'name' => $name,
                     'type' => \Laminas\Form\Element\MultiCheckbox::class,
                     'options' => [
-                        'element_group' => 'blocksdisposition',
+                        'element_group' => 'themes_old',
                         'label' => $blockTitles[$name],
                         // Set initial order, even if js does it.
                         'value_options' => $valueOptions,
@@ -285,7 +292,9 @@ class Module extends AbstractModule
         }
 
         $form = $event->getTarget();
-        $fieldsetElementGroups = ['blocksdisposition' => 'Blocks disposition'];
+        $fieldsetElementGroups = [
+            'themes_old' => 'Old themes', // @translate
+        ];
         $form->setOption('element_groups', array_merge($form->getOption('element_groups') ?: [], $fieldsetElementGroups));
         foreach ($fieldset->getFieldsets() as $subFieldset) {
             $form->add($subFieldset);
