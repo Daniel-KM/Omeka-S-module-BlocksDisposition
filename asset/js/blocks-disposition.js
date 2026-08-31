@@ -36,7 +36,7 @@ $(document).ready(function () {
         }
 
         var block_settings = [];
-        block_settings = $.parseJSON(inputVal);
+        block_settings = JSON.parse(inputVal);
         // Remove empty values that may exist.
         block_settings = block_settings.filter(item => item);
 
@@ -77,10 +77,12 @@ $(document).ready(function () {
     });
 
     blocksdisposition.find('.button').click(function () {
-        $(this).toggleClass('active');
-        $(this).parent().find('.js-module-position').toggleClass('active');
-        var attr_block_name = $(this).parent().parent().parent().parent().attr('data-block-name');
-        rerange_modules($(this).html(), attr_block_name);
+        var $button = $(this);
+        $button.toggleClass('active');
+        $button.parent().find('.js-module-position').toggleClass('active');
+        $button.attr('aria-pressed', $button.hasClass('active') ? 'true' : 'false');
+        var attr_block_name = $button.parent().parent().parent().parent().attr('data-block-name');
+        rerange_modules($button.html(), attr_block_name);
     });
 
     function rerange_modules(clicked_module, attr_block_name) {
