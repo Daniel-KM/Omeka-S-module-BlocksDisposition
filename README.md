@@ -131,7 +131,7 @@ altered, and that no provisions are either added or removed herefrom.
 Copyright
 ---------
 
-* Copyright Daniel Berthereau, 2019-2025 (see [Daniel-KM] on GitLab)
+* Copyright Daniel Berthereau, 2019-2026 (see [Daniel-KM] on GitLab)
 
 
 [Blocks Disposition]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition
@@ -145,7 +145,7 @@ Copyright
 [Collecting]: https://github.com/omeka-s-modules/Collecting
 [installing a module]: https://omeka.org/s/docs/user-manual/modules/#installing-modules
 [config/module.config.php]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition/blob/master/config/module.config.php#L26-L96
-[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition/-/issues
+[module issues]: https://gitlab.com/Daniel-KM/Omeka-S-module-BlocksDisposition/-/work_items
 [CeCILL v2.1]: https://www.cecill.info/licences/Licence_CeCILL_V2.1-en.html
 [GNU/GPL]: https://www.gnu.org/licenses/gpl-3.0.html
 [FSF]: https://www.fsf.org
