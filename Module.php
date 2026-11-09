@@ -165,6 +165,12 @@ class Module extends AbstractModule
     /**
      * Enable, disable and reorder modules according to the site settings.
      *
+     * Only the modules that display something in the resource pages, listed in
+     * the config, are managed. The other listeners are kept in place with their
+     * priority, for example the noindex of the core, the canonical url of the
+     * module CleanUrl or the meta tags of the module MetaTags. The closures are
+     * kept too.
+     *
      * @param string $identifier Event identifier
      * @param string $eventName
      * @param string $siteSettingName
@@ -172,31 +178,63 @@ class Module extends AbstractModule
     protected function rewriteListeners($identifier, $eventName, $siteSettingName): void
     {
         $services = $this->getServiceLocator();
-        $sharedEventManager = $services->get('SharedEventManager');
 
         // The current site is automatically set.
         $moduleNames = $services->get('Omeka\Settings\Site')->get($siteSettingName, []);
-        $moduleListeners = [];
+        if (!is_array($moduleNames)) {
+            $moduleNames = explode(',', (string) $moduleNames);
+        }
+        $moduleNames = array_values(array_unique(array_filter(array_map('trim', $moduleNames), 'strlen')));
 
-        // Detach all listeners for the event.
-        $listeners = $sharedEventManager->getListeners([$identifier], $eventName);
-        foreach ($listeners as $listener) {
-            foreach ($listener as $callable) {
-                // Only object/method with the namespace of the module are
-                // managed, not closures. Nevertheless, closures are kept.
-                if (is_array($callable) && is_object($callable[0])) {
-                    $moduleName = strtok(get_class($callable[0]), '\\');
-                    $moduleListeners[$moduleName] = $callable;
-                    $sharedEventManager->detach($callable, $identifier, $eventName);
-                }
+        // The modules checked in the site settings are managed too, even if they
+        // are no more listed in the config.
+        $view = substr($siteSettingName, strlen('blocksdisposition_'));
+        $managedModules = array_flip(array_merge(
+            $services->get('Config')['blocksdisposition']['views'][$view] ?? [],
+            $moduleNames
+        ));
+
+        // Detach the listeners of the managed modules, keeping all of them by
+        // module in their original order.
+        $sharedEventManager = $services->get('SharedEventManager');
+        $moduleListeners = [];
+        foreach ($this->listCallables($sharedEventManager->getListeners([$identifier], $eventName)) as $callable) {
+            if (!is_array($callable)) {
+                continue;
+            }
+            $moduleName = strtok(get_class($callable[0]), '\\');
+            if (isset($managedModules[$moduleName])) {
+                $moduleListeners[$moduleName][] = $callable;
+                $sharedEventManager->detach($callable, $identifier, $eventName);
             }
         }
 
-        // Attach listed and ordered modules to the event.
-        $moduleNames = array_intersect($moduleNames, array_keys($moduleListeners));
+        // Attach the checked modules in the order of the site settings.
         foreach ($moduleNames as $moduleName) {
-            $sharedEventManager->attach($identifier, $eventName, $moduleListeners[$moduleName]);
+            foreach ($moduleListeners[$moduleName] ?? [] as $callable) {
+                $sharedEventManager->attach($identifier, $eventName, $callable);
+            }
         }
+    }
+
+    /**
+     * Get the callables of the nested lists of listeners.
+     *
+     * @return array List of closures and of arrays with an object and a method.
+     */
+    protected function listCallables(array $listeners): array
+    {
+        $callables = [];
+        foreach ($listeners as $listener) {
+            if ($listener instanceof \Closure
+                || (is_array($listener) && count($listener) === 2 && is_object($listener[0] ?? null) && is_string($listener[1] ?? null))
+            ) {
+                $callables[] = $listener;
+            } elseif (is_array($listener)) {
+                $callables = array_merge($callables, $this->listCallables($listener));
+            }
+        }
+        return $callables;
     }
 
     public function handleSiteSettingsHeader(Event $event): void
