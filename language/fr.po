@@ -1,0 +1,122 @@
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-17 13:26+0100\n"
+"PO-Revision-Date: 2026-11-17 13:26+0100\n"
+"Last-Translator: Daniel Berthereau <Daniel.fr@Berthereau.net>\n"
+"Language-Team: \n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.6\n"
+
+#: data/scripts/upgrade.php:34 Module.php:93
+#, php-format
+msgid "The module %1$s should be upgraded to version %2$s or later."
+msgstr "Le module %1$s doit être mis à niveau à la version %2$s ou supérieure."
+
+#: data/scripts/upgrade.php:38
+msgid "Missing requirement. Unable to upgrade."
+msgstr "Pré-requis absent. Impossible de mettre à jour."
+
+#: data/scripts/upgrade.php:63
+#, php-format
+msgid ""
+"The module manages only the modules that display something in the resource "
+"pages, so the other features of the modules are kept, for example the "
+"\"noindex\" of the core or the canonical url. It is now enabled by site, and "
+"it was enabled for all sites (%d) to keep the same display. A site that does "
+"not enable it is not modified, nor the resource pages of a site whose theme "
+"manages the resource page blocks."
+msgstr ""
+"Ce module gère uniquement les modules qui affichent du contenu dans les "
+"pages de ressources ; les autres fonctionnalités des modules sont donc "
+"conservées, comme par exemple l’attribut « noindex » du noyau ou l’url "
+"canonique. Il est désormais activé au niveau du site et a été activé pour "
+"tous les sites (%d) afin de conserver le même affichage. Un site qui ne "
+"l’active pas n’est pas modifié, de même pour les pages de ressources dont le "
+"thème gère les blocs de ressources."
+
+#: Module.php:301
+msgid "For item set show"
+msgstr "Vue collection : haut"
+
+#: Module.php:302
+msgid "For item show"
+msgstr "Contenu / vue"
+
+#: Module.php:303
+msgid "For media show"
+msgstr "Média / vue"
+
+#: Module.php:304
+msgid "For item set browse"
+msgstr "Collection / liste"
+
+#: Module.php:305
+msgid "For item browse"
+msgstr "Contenu / liste"
+
+#: Module.php:346
+msgid ""
+"The theme of this site manages the resource page blocks, so this module is "
+"not used for the resource pages: set the blocks of the modules in the "
+"resource pages of the site. Their settings are kept, but not applied. The "
+"lists of resources are still managed."
+msgstr ""
+"Le thème de ce site gère les blocs de ressources ; ce module n'est donc pas "
+"utilisé. Configurez les blocs des modules dans les pages de ressources du "
+"site. Les paramètres du module sont conservés, mais ne sont pas appliqués. "
+"Lorsque tous les thèmes les gèrent, le module peut être désactivé."
+
+#: Module.php:348
+#, php-format
+msgid "Current settings of the resource pages: %s."
+msgstr "Paramètres actuels des pages de ressources : %s."
+
+#: Module.php:486
+msgid ""
+"All the themes of the sites manage the resource page blocks, so the module "
+"Blocks Disposition is used only for the lists of resources. If they are not "
+"managed, the module can be disabled. Set the blocks of the modules in the "
+"resource pages of each site."
+msgstr ""
+"Tous les thèmes des sites gèrent les blocs des pages de ressources ; le "
+"module « Blocks Disposition » est utilisé seulement pour les listes de "
+"ressources. Si elles ne sont pas gérées, le module peut être désactivé. "
+"Configurez les blocs des modules dans les pages de ressources de chaque site."
+
+#: Module.php:326
+msgid "Old themes"
+msgstr "Anciens thèmes"
+
+#: Module.php:348
+msgid " ; "
+msgstr " ; "
+
+#: Module.php:355
+msgid "Blocks Disposition"
+msgstr "Blocks Disposition"
+
+#: Module.php:370
+msgid "Manage the display of the modules in the resource pages"
+msgstr "Gérer l'affichage des modules dans les pages de ressources"
+
+#: Module.php:371
+msgid ""
+"When unchecked, the modules are displayed as set by the theme. When checked, "
+"only the modules checked below are displayed, in the selected order, and the "
+"other features of the modules are kept."
+msgstr ""
+"Si non cochée, les modules s'affichent tels que définis par le thème. Si "
+"cochée, seuls les modules cochés ci-dessous s'affichent, dans l'ordre "
+"sélectionné, et les autres fonctionnalités des modules sont conservées."
+
+#~ msgid "enabled"
+#~ msgstr "activé"
+
+#~ msgid "disabled"
+#~ msgstr "désactivé"

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-05 00:00+0000\n"
+"POT-Creation-Date: 2026-11-17 13:26+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,27 +17,86 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: data/scripts/upgrade.php:34 Module.php:68
+#: data/scripts/upgrade.php:34 Module.php:93
 #, php-format
 msgid "The module %1$s should be upgraded to version %2$s or later."
 msgstr ""
 
-#: Module.php:213
+#: data/scripts/upgrade.php:38
+msgid "Missing requirement. Unable to upgrade."
+msgstr ""
+
+#: data/scripts/upgrade.php:63
+#, php-format
+msgid ""
+"The module manages only the modules that display something in the resource "
+"pages, so the other features of the modules are kept, for example the "
+"\"noindex\" of the core or the canonical url. It is now enabled by site, and "
+"it was enabled for all sites (%d) to keep the same display. A site that does "
+"not enable it is not modified, nor the resource pages of a site whose theme "
+"manages the resource page blocks."
+msgstr ""
+
+#: Module.php:301
 msgid "For item set show"
 msgstr ""
 
-#: Module.php:214
+#: Module.php:302
 msgid "For item show"
 msgstr ""
 
-#: Module.php:215
+#: Module.php:303
 msgid "For media show"
 msgstr ""
 
-#: Module.php:216
+#: Module.php:304
 msgid "For item set browse"
 msgstr ""
 
-#: Module.php:217
+#: Module.php:305
 msgid "For item browse"
+msgstr ""
+
+#: Module.php:346
+msgid ""
+"The theme of this site manages the resource page blocks, so this module is "
+"not used for the resource pages: set the blocks of the modules in the "
+"resource pages of the site. Their settings are kept, but not applied. The "
+"lists of resources are still managed."
+msgstr ""
+
+#: Module.php:348
+#, php-format
+msgid "Current settings of the resource pages: %s."
+msgstr ""
+
+#: Module.php:486
+msgid ""
+"All the themes of the sites manage the resource page blocks, so the module "
+"Blocks Disposition is used only for the lists of resources. If they are not "
+"managed, the module can be disabled. Set the blocks of the modules in the "
+"resource pages of each site."
+msgstr ""
+
+#: Module.php:326
+msgid "Old themes"
+msgstr ""
+
+#: Module.php:348
+msgid " ; "
+msgstr ""
+
+#: Module.php:355
+msgid "Blocks Disposition"
+msgstr ""
+
+#: Module.php:370
+msgid "Manage the display of the modules in the resource pages"
+msgstr ""
+
+#: Module.php:371
+msgid ""
+"When unchecked, the modules are displayed as set by the theme. When checked, "
+"only the modules checked below are displayed, in the selected order, and the "
+"other features of the modules are kept."
 msgstr ""
