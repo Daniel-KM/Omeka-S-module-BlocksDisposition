@@ -71,6 +71,16 @@ class Module extends AbstractModule
 {
     const NAMESPACE = __NAMESPACE__;
 
+    /**
+     * Settings of the resource pages, that may be managed by the theme with the
+     * resource page blocks, unlike the lists of resources.
+     */
+    const RESOURCE_PAGE_SETTINGS = [
+        'blocksdisposition_item_set_show',
+        'blocksdisposition_item_show',
+        'blocksdisposition_media_show',
+    ];
+
     use TraitModule;
 
     protected function preInstall(): void
@@ -184,12 +194,13 @@ class Module extends AbstractModule
     {
         $services = $this->getServiceLocator();
 
-        // Nothing is changed when the module is not enabled for the site or
-        // when the theme manages the resource page blocks.
+        // Nothing is changed when the module is not enabled for the site, or for
+        // the resource pages when the theme manages the resource page blocks.
         // The current site is automatically set.
         $siteSettings = $services->get('Omeka\Settings\Site');
         if (!$siteSettings->get('blocksdisposition_enabled')
-            || $this->themeHasResourcePageBlocks($services->get('ControllerPluginManager')->get('currentSite')())
+            || (in_array($siteSettingName, self::RESOURCE_PAGE_SETTINGS)
+                && $this->themeHasResourcePageBlocks($services->get('ControllerPluginManager')->get('currentSite')()))
         ) {
             return;
         }
@@ -316,21 +327,25 @@ class Module extends AbstractModule
         ];
         $form->setOption('element_groups', array_merge($form->getOption('element_groups') ?: [], $fieldsetElementGroups));
 
-        // When the theme manages the resource page blocks, the settings are not
-        // used, so they are only displayed and they are kept when the form is
-        // saved, because their elements are not added.
+        // When the theme manages the resource page blocks, the settings of the
+        // resource pages are not used, so they are only displayed and they are
+        // kept when the form is saved, because their elements are not added.
+        // The lists of resources are still managed.
         if ($this->themeHasResourcePageBlocks($site())) {
             $current = [];
-            foreach ($data as $name => $value) {
+            foreach (self::RESOURCE_PAGE_SETTINGS as $name) {
+                $value = $data[$name] ?? [];
                 $values = is_array($value) ? $value : explode(',', (string) $value);
                 $values = array_filter(array_map('trim', $values), 'strlen');
                 if ($values) {
                     $current[] = $blockTitles[$name] . ' : ' . implode(', ', $values);
                 }
+                unset($data[$name], $blockTitles[$name]);
             }
-            $message = $translator->translate('The theme of this site manages the resource page blocks, so this module is not used: set the blocks of the modules in the resource pages of the site. The settings of the module are kept, but not applied. When all the themes manage them, the module can be disabled.'); // @translate
+            $fieldset->setAttribute('data-block-titles', json_encode($blockTitles));
+            $message = $translator->translate('The theme of this site manages the resource page blocks, so this module is not used for the resource pages: set the blocks of the modules in the resource pages of the site. Their settings are kept, but not applied. The lists of resources are still managed.'); // @translate
             if ($current) {
-                $message .= ' ' . sprintf($translator->translate('Current settings, %1$s: %2$s.'), $isEnabled ? $translator->translate('enabled') : $translator->translate('disabled'), implode(' ; ', $current)); // @translate
+                $message .= ' ' . sprintf($translator->translate('Current settings of the resource pages: %s.'), implode(' ; ', $current)); // @translate
             }
             $form->add([
                 'name' => 'blocksdisposition_note',
@@ -344,7 +359,6 @@ class Module extends AbstractModule
                     'id' => 'blocksdisposition_note',
                 ],
             ]);
-            return;
         }
 
         $fieldset
@@ -469,7 +483,7 @@ class Module extends AbstractModule
             }
         }
         $view = $event->getTarget();
-        $message = $view->translate('All the themes of the sites manage the resource page blocks, so the module Blocks Disposition is useless and can be disabled. Set the blocks of the modules in the resource pages of each site.'); // @translate
+        $message = $view->translate('All the themes of the sites manage the resource page blocks, so the module Blocks Disposition is used only for the lists of resources. If they are not managed, the module can be disabled. Set the blocks of the modules in the resource pages of each site.'); // @translate
         echo '<ul class="messages"><li class="warning">' . $view->escapeHtml($message) . '</li></ul>';
     }
 
