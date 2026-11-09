@@ -1,39 +1,41 @@
-#blocksdisposition .js-module {
-    width: auto;
-    display: inline-flex;
-    background-color: transparent;
-}
-#blocksdisposition .button.active {
-    outline: -webkit-focus-ring-color auto 5px;
-}
-#blocksdisposition .js-module-position {
-    position: absolute;
-    right: 0px;
-    top: -4px;
-    border: 1px solid;
-    background-color: #fff;
-    border-radius: 11px;
-    padding-left: 5px;
-    padding-right: 6px;
-    display: none;
-    color: green;
-    line-height: 22px;
-}
-#blocksdisposition .js-module-position.active {
-    display: block;
-}
-#blocksdisposition .block-for {
-    display: flex;
-}
-#blocksdisposition .block-for .block_title {
-    margin-top: 10px;
-    width: 152px;
-    min-width: 152px;
-    text-align: right;
-    margin-right: 10px;
-}
-/* The raw inputs are replaced by the buttons. */
-#blocksdisposition .field:has(input.module-sort),
-#blocksdisposition .field:has(input[name$="-hide[]"]) {
-    display: none;
+#blocksdisposition {
+    & .js-module {
+        width: auto;
+        display: inline-flex;
+        background-color: transparent;
+    }
+    & .button.active {
+        outline: -webkit-focus-ring-color auto 5px;
+    }
+    & .js-module-position {
+        position: absolute;
+        right: 0px;
+        top: -4px;
+        border: 1px solid;
+        background-color: #fff;
+        border-radius: 11px;
+        padding-left: 5px;
+        padding-right: 6px;
+        display: none;
+        color: green;
+        line-height: 22px;
+        &.active {
+            display: block;
+        }
+    }
+    & .block-for {
+        display: flex;
+        & .block_title {
+            margin-top: 10px;
+            width: 152px;
+            min-width: 152px;
+            text-align: right;
+            margin-right: 10px;
+        }
+    }
+    /* The raw inputs are replaced by the buttons. */
+    & .field:has(input.module-sort),
+    & .field:has(input[name$="-hide[]"]) {
+        display: none;
+    }
 }
