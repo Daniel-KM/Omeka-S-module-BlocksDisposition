@@ -32,12 +32,28 @@ Usage
 -----
 
 The options can be set differently for each site in the site settings, under
-`Blocks Disposition`. Simply enable and set the order of each feature for each
-type of page.
+`Blocks Disposition`. Enable the management of the display for the site, then
+select and set the order of each feature for each type of page. When it is not
+enabled, the modules are displayed as set by the theme. When it is enabled and
+no module is checked for a type of page, no managed module is displayed there.
 
 The process uses the trigger `view.show.before` to reorder the modules that use
 the trigger `view.show.after`, so they must not be removed from the theme. It is
 the same for the triggers `view.browse.before` and `view.browse.after`.
+
+Only the modules that display something in the resource pages, listed in the
+config, are managed. The other listeners are kept in place with their priority,
+for example the `noindex` of the core, the canonical url of the module CleanUrl
+or the meta tags of the module MetaTags. All the listeners of a managed module
+are kept, in their order.
+
+Since Omeka S v4.1, the themes may manage the resource page blocks, that allow
+to place the blocks of the modules in the resource pages of each site. For a
+site with such a theme, this module is not applied to the resource pages (item,
+media and item set) and their settings are only displayed, so they are kept.
+The lists of resources, that have no resource page blocks, are still managed.
+When all the themes of the sites manage the resource page blocks, a message in
+the list of modules indicates that the module is used only for the lists.
 
 Some modules may not be listed: add them in the module [config/module.config.php].
 This module is not yet enable to determine all modules that are used in the
