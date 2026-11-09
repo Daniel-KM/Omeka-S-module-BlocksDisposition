@@ -17,6 +17,15 @@ $(document).ready(function () {
         available_modules_by_view = blocksDispositionData.data('modules-by-view');
     }
 
+    // Display the buttons just after the setting to enable the module, below
+    // the note about the theme if any, else at the end of the fieldset, where
+    // other modules may add their settings.
+    var blocksContainer = blocksdisposition;
+    const enabledField = $('#blocksdisposition_enabled').closest('.field');
+    if (enabledField.length) {
+        blocksContainer = $('<div class="blocks-disposition-blocks"></div>').insertAfter(enabledField);
+    }
+
     $.each(blocks_title, function (key, val) {
         site_settings_blocks.push({
             'name': key,
@@ -63,7 +72,7 @@ $(document).ready(function () {
         ), appendFieldButton);
         available_modules_html += '</div>';
 
-        blocksdisposition.append(site_settings_blocks_html);
+        blocksContainer.append(site_settings_blocks_html);
         $('.js-' + val.name + ' .block_buttons').append(available_modules_html);
 
         // Set active buttons for block settings.

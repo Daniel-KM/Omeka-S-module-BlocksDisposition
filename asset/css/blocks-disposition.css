@@ -1,4 +1,4 @@
-#blocksdisposition .field {
+#blocksdisposition .js-module {
     width: auto;
     display: inline-flex;
     background-color: transparent;
@@ -32,10 +32,8 @@
     text-align: right;
     margin-right: 10px;
 }
-#blocksdisposition .field {
+/* The raw inputs are replaced by the buttons. */
+#blocksdisposition .field:has(input.module-sort),
+#blocksdisposition .field:has(input[name$="-hide[]"]) {
     display: none;
-    color:red;
-}
-#blocksdisposition .js-module {
-    display: inline-flex;
 }
