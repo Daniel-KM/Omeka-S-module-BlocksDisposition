@@ -126,6 +126,11 @@ class Module extends AbstractModule
             [$this, 'handleSiteSettingsHeader']
         );
         $sharedEventManager->attach(
+            'Omeka\Controller\Admin\Module',
+            'view.browse.before',
+            [$this, 'handleModuleBrowse']
+        );
+        $sharedEventManager->attach(
             \Omeka\Form\SiteSettingsForm::class,
             'form.add_elements',
             [$this, 'handleSiteSettings']
@@ -179,10 +184,13 @@ class Module extends AbstractModule
     {
         $services = $this->getServiceLocator();
 
-        // Nothing is changed when the module is not enabled for the site.
+        // Nothing is changed when the module is not enabled for the site or
+        // when the theme manages the resource page blocks.
         // The current site is automatically set.
         $siteSettings = $services->get('Omeka\Settings\Site');
-        if (!$siteSettings->get('blocksdisposition_enabled')) {
+        if (!$siteSettings->get('blocksdisposition_enabled')
+            || $this->themeHasResourcePageBlocks($services->get('ControllerPluginManager')->get('currentSite')())
+        ) {
             return;
         }
         $moduleNames = $siteSettings->get($siteSettingName, []);
@@ -308,6 +316,37 @@ class Module extends AbstractModule
         ];
         $form->setOption('element_groups', array_merge($form->getOption('element_groups') ?: [], $fieldsetElementGroups));
 
+        // When the theme manages the resource page blocks, the settings are not
+        // used, so they are only displayed and they are kept when the form is
+        // saved, because their elements are not added.
+        if ($this->themeHasResourcePageBlocks($site())) {
+            $current = [];
+            foreach ($data as $name => $value) {
+                $values = is_array($value) ? $value : explode(',', (string) $value);
+                $values = array_filter(array_map('trim', $values), 'strlen');
+                if ($values) {
+                    $current[] = $blockTitles[$name] . ' : ' . implode(', ', $values);
+                }
+            }
+            $message = $translator->translate('The theme of this site manages the resource page blocks, so this module is not used: set the blocks of the modules in the resource pages of the site. The settings of the module are kept, but not applied. When all the themes manage them, the module can be disabled.'); // @translate
+            if ($current) {
+                $message .= ' ' . sprintf($translator->translate('Current settings, %1$s: %2$s.'), $isEnabled ? $translator->translate('enabled') : $translator->translate('disabled'), implode(' ; ', $current)); // @translate
+            }
+            $form->add([
+                'name' => 'blocksdisposition_note',
+                'type' => \Common\Form\Element\Note::class,
+                'options' => [
+                    'element_group' => 'themes_old',
+                    'label' => 'Blocks Disposition', // @translate
+                    'text' => $message,
+                ],
+                'attributes' => [
+                    'id' => 'blocksdisposition_note',
+                ],
+            ]);
+            return;
+        }
+
         $fieldset
             ->add([
                 'name' => 'blocksdisposition_enabled',
@@ -411,6 +450,45 @@ class Module extends AbstractModule
                 'name' => 'blocksdisposition_media_show',
                 'required' => false,
             ]);
+    }
+
+    /**
+     * Invite to disable the module when all the themes manage the blocks.
+     */
+    public function handleModuleBrowse(Event $event): void
+    {
+        $themes = $this->getServiceLocator()->get('Omeka\Connection')
+            ->executeQuery('SELECT DISTINCT `theme` FROM `site`')
+            ->fetchFirstColumn();
+        if (!$themes) {
+            return;
+        }
+        foreach ($themes as $theme) {
+            if (!$this->themeHasResourcePageBlocks((string) $theme)) {
+                return;
+            }
+        }
+        $view = $event->getTarget();
+        $message = $view->translate('All the themes of the sites manage the resource page blocks, so the module Blocks Disposition is useless and can be disabled. Set the blocks of the modules in the resource pages of each site.'); // @translate
+        echo '<ul class="messages"><li class="warning">' . $view->escapeHtml($message) . '</li></ul>';
+    }
+
+    /**
+     * Check if a theme manages the resource page blocks (Omeka S v4.1).
+     *
+     * @param \Omeka\Api\Representation\SiteRepresentation|string|null $site
+     *   The site or the theme name.
+     */
+    protected function themeHasResourcePageBlocks($site): bool
+    {
+        $themeName = is_object($site) ? $site->theme() : (string) $site;
+        if ($themeName === '') {
+            return false;
+        }
+        $theme = $this->getServiceLocator()->get('Omeka\Site\ThemeManager')->getTheme($themeName);
+        return $theme
+            && method_exists($theme, 'isConfigurableResourcePageBlocks')
+            && $theme->isConfigurableResourcePageBlocks();
     }
 
     protected function listModulesByView()
