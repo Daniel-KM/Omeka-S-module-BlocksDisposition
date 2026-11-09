@@ -17,6 +17,7 @@ return [
             'blocksdisposition_modules' => [],
         ],
         'site_settings' => [
+            'blocksdisposition_enabled' => false,
             'blocksdisposition_item_browse' => [],
             'blocksdisposition_item_show' => [],
             'blocksdisposition_item_set_browse' => [],

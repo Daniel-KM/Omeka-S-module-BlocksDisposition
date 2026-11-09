@@ -179,8 +179,13 @@ class Module extends AbstractModule
     {
         $services = $this->getServiceLocator();
 
+        // Nothing is changed when the module is not enabled for the site.
         // The current site is automatically set.
-        $moduleNames = $services->get('Omeka\Settings\Site')->get($siteSettingName, []);
+        $siteSettings = $services->get('Omeka\Settings\Site');
+        if (!$siteSettings->get('blocksdisposition_enabled')) {
+            return;
+        }
+        $moduleNames = $siteSettings->get($siteSettingName, []);
         if (!is_array($moduleNames)) {
             $moduleNames = explode(',', (string) $moduleNames);
         }
@@ -270,6 +275,8 @@ class Module extends AbstractModule
 
         $settingType = 'site_settings';
         $data = $this->prepareDataToPopulate($settings, $settingType, $targetId);
+        $isEnabled = !empty($data['blocksdisposition_enabled']);
+        unset($data['blocksdisposition_enabled']);
 
         $blockTitles = [
             'blocksdisposition_item_set_show' => $translator->translate('For item set show'), // @translate
@@ -295,13 +302,33 @@ class Module extends AbstractModule
                 ->setLabel('Blocks Disposition (module config missing)');
         }
 
+        $form = $event->getTarget();
+        $fieldsetElementGroups = [
+            'themes_old' => 'Old themes', // @translate
+        ];
+        $form->setOption('element_groups', array_merge($form->getOption('element_groups') ?: [], $fieldsetElementGroups));
+
+        $fieldset
+            ->add([
+                'name' => 'blocksdisposition_enabled',
+                'type' => \Laminas\Form\Element\Checkbox::class,
+                'options' => [
+                    'element_group' => 'themes_old',
+                    'label' => 'Manage the display of the modules in the resource pages', // @translate
+                    'info' => 'When unchecked, the modules are displayed as set by the theme. When checked, only the modules checked below are displayed, in the selected order, and the other features of the modules are kept.', // @translate
+                ],
+                'attributes' => [
+                    'id' => 'blocksdisposition_enabled',
+                ],
+            ]);
+
         // Hidden doesn't support multiple ordered values in Zend, so a
         // multicheckbox is added. The hidden values are not saved, because Zend
         // wraps the name with the fieldset name.
         // TODO Finalize the js (sort checkbox + enable/disable) so the hidden inputs won't be needed anymore.
         foreach ($data as $name => $value) {
-            $values = is_array($value) ? $value : explode(',', $value);
-            $values = array_values(array_unique($values));
+            $values = is_array($value) ? $value : explode(',', (string) $value);
+            $values = array_values(array_unique(array_filter(array_map('trim', $values), 'strlen')));
             $valueOptions = array_combine($values, $values)
                 + array_combine($modulesByView[substr($name, 18)], $modulesByView[substr($name, 18)]);
 
@@ -327,6 +354,9 @@ class Module extends AbstractModule
                         'label' => $blockTitles[$name],
                         // Set initial order, even if js does it.
                         'value_options' => $valueOptions,
+                        // Allow to save an empty list.
+                        'use_hidden_element' => true,
+                        'unchecked_value' => '',
                     ],
                     'attributes' => [
                         // No id: it works only on the first, and it's hidden.
@@ -344,24 +374,23 @@ class Module extends AbstractModule
             }
         }
 
-        $form = $event->getTarget();
-        $fieldsetElementGroups = [
-            'themes_old' => 'Old themes', // @translate
-        ];
-        $form->setOption('element_groups', array_merge($form->getOption('element_groups') ?: [], $fieldsetElementGroups));
         foreach ($fieldset->getFieldsets() as $subFieldset) {
             $form->add($subFieldset);
         }
         foreach ($fieldset->getElements() as $element) {
             $form->add($element);
         }
-        $form->populateValues($data);
+        $form->populateValues($data + ['blocksdisposition_enabled' => $isEnabled]);
     }
 
     public function handleSiteSettingsFilters(Event $event): void
     {
         $inputFilter = $event->getParam('inputFilter');
         $inputFilter
+            ->add([
+                'name' => 'blocksdisposition_enabled',
+                'required' => false,
+            ])
             ->add([
                 'name' => 'blocksdisposition_item_browse',
                 'required' => false,
